@@ -1,0 +1,14 @@
+{
+  "name": "ueef/postman",
+  "type": "library",
+  "require": {
+    "php": ">=7.0.1",
+    "ueef/assignable": "*",
+    "ueef/postbox-ampq-driver": "0.0.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Ueef\\Postbox\\": "src"
+    }
+  }
+}

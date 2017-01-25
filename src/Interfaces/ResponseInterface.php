@@ -1,0 +1,13 @@
+<?php
+
+namespace Ueef\Postbox\Interfaces {
+
+    interface ResponseInterface
+    {
+        public function getData(): array;
+        public function getErrorCode(): int;
+        public function getErrorMessage(): string;
+        public function getAddress(): array;
+    }
+}
+
