@@ -3,8 +3,7 @@
   "type": "library",
   "require": {
     "php": ">=7.0.1",
-    "ueef/assignable": "*",
-    "ueef/postbox-ampq-driver": "0.0.*"
+    "ueef/assignable": "*"
   },
   "autoload": {
     "psr-4": {
