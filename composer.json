@@ -1,5 +1,5 @@
 {
-  "name": "ueef/postman",
+  "name": "ueef/postbox",
   "type": "library",
   "require": {
     "php": ">=7.0.1",
