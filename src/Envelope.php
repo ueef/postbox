@@ -23,7 +23,7 @@ namespace Ueef\Postbox {
         public function makeRequest(RequestInterface $request): string
         {
             return $this->encoder->encode([
-                'request' => implode(':', $request->getAddress()),
+                'request' => implode(':', $request->getRoute()),
                 'data' => $request->getData(),
             ]);
         }
@@ -40,11 +40,11 @@ namespace Ueef\Postbox {
                 throw new Exception('Wrong request format', Exception::CODE_REQUEST_FORMAT);
             }
 
-            $address = explode(':', $message['request']);
+            $route = explode(':', $message['request']);
 
             return new Request([
-                'address' => $address,
-                'service' => reset($address),
+                'route' => $route,
+                'service' => reset($route),
                 'data' => $message['data'],
             ]);
         }
@@ -52,7 +52,7 @@ namespace Ueef\Postbox {
         public function makeResponse(ResponseInterface $response): string
         {
             return $this->encoder->encode([
-                'request' => implode(':', $response->getAddress()),
+                'request' => implode(':', $response->getRoute()),
                 'response' => $response->getData(),
                 'error' => [
                     'code' => $response->getErrorCode(),
@@ -73,11 +73,11 @@ namespace Ueef\Postbox {
                 throw new Exception('Wrong response format', Exception::CODE_RESPONSE_FORMAT);
             }
 
-            $address = explode(':', $message['request']);
+            $route = explode(':', $message['request']);
 
             return new Response([
-                'address' => $address,
-                'service' => reset($address),
+                'route' => $route,
+                'service' => reset($route),
                 'data' => $message['request'],
                 'error_code' => $message['error']['code'],
                 'error_message' => $message['error']['message'],

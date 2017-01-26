@@ -24,20 +24,20 @@ namespace Ueef\Postbox {
         private $envelope;
 
 
-        public function send(array $address, array $data)
+        public function send(array $route, array $data)
         {
             $request = new Request([
-                'address' => $address,
+                'route' => $route,
                 'data' => $data,
             ]);
 
             $this->driver->send($request->getService(), $this->envelope->makeRequest($request));
         }
 
-        public function request(array $address, array $data): ResponseInterface
+        public function request(array $route, array $data): ResponseInterface
         {
             $request = new Request([
-                'address' => $address,
+                'route' => $route,
                 'data' => $data,
             ]);
 

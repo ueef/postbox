@@ -18,7 +18,7 @@ namespace Ueef\Postbox {
         /**
          * @var array
          */
-        private $address;
+        private $route;
 
         /**
          * @var string
@@ -31,9 +31,9 @@ namespace Ueef\Postbox {
             return $this->data;
         }
 
-        public function getAddress(): array
+        public function getRoute(): array
         {
-            return $this->address;
+            return $this->route;
         }
 
         public function getService(): string
