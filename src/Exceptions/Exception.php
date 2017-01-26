@@ -15,8 +15,9 @@ namespace Ueef\Postbox\Exceptions {
         const CODE_RESPONSE = 40;
         const CODE_RESPONSE_EMPTY = 41;
         const CODE_RESPONSE_FORMAT = 42;
-        const CODE_SERVICE = 50;
-        const CODE_SERVICE_ACTION_UNDEFINED = 51;
+        const CODE_HANDLER = 50;
+        const CODE_HANDLER_ROUTE_EMPTY = 51;
+        const CODE_HANDLER_ROUTE_UNDEFINED = 52;
     }
 }
 
