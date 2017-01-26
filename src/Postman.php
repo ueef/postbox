@@ -31,7 +31,7 @@ namespace Ueef\Postbox {
                 'data' => $data,
             ]);
 
-            $this->driver->send($request->getService(), $this->envelope->makeRequest($request));
+            $this->driver->send($request->getQueue(), $this->envelope->makeRequest($request));
         }
 
         public function request(array $route, array $data): ResponseInterface
@@ -41,7 +41,7 @@ namespace Ueef\Postbox {
                 'data' => $data,
             ]);
 
-            return $this->envelope->parseResponse($this->driver->request($request->getService(), $this->envelope->makeRequest($request)));
+            return $this->envelope->parseResponse($this->driver->request($request->getQueue(), $this->envelope->makeRequest($request)));
         }
     }
 }

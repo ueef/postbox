@@ -6,7 +6,7 @@ namespace Ueef\Postbox\Interfaces {
     {
         public function getData(): array;
         public function getRoute(): array;
-        public function getService(): string;
+        public function getQueue(): string;
     }
 }
 

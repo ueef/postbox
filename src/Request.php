@@ -23,7 +23,7 @@ namespace Ueef\Postbox {
         /**
          * @var string
          */
-        private $service;
+        private $queue;
 
 
         public function getData(): array
@@ -36,9 +36,9 @@ namespace Ueef\Postbox {
             return $this->route;
         }
 
-        public function getService(): string
+        public function getQueue(): string
         {
-            return $this->service;
+            return $this->queue;
         }
     }
 }

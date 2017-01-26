@@ -44,7 +44,7 @@ namespace Ueef\Postbox {
 
             return new Request([
                 'route' => $route,
-                'service' => reset($route),
+                'queue' => reset($route),
                 'data' => $message['data'],
             ]);
         }
@@ -77,7 +77,6 @@ namespace Ueef\Postbox {
 
             return new Response([
                 'route' => $route,
-                'service' => reset($route),
                 'data' => $message['request'],
                 'error_code' => $message['error']['code'],
                 'error_message' => $message['error']['message'],
