@@ -51,9 +51,16 @@ namespace Ueef\Postbox {
 
         public function makeResponse(ResponseInterface $response): string
         {
+            $data = $response->getData();
+
+            // в ответе поле request всегда должно быть объектом
+            if (!$data) {
+                $data = (object) [];
+            }
+
             return $this->encoder->encode([
                 'request' => implode(':', $response->getRoute()),
-                'response' => $response->getData(),
+                'response' => $data,
                 'error' => [
                     'code' => $response->getErrorCode(),
                     'message' => $response->getErrorMessage(),
