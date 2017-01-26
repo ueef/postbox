@@ -2,9 +2,10 @@
 
 namespace Ueef\Postbox {
 
-    use Ueef\Assignable\Interfaces\AssignableInterface;
-    use Ueef\Assignable\Traits\AssignableTrait;
+    use Ueef\Postbox\Exceptions\Exception;
     use Ueef\Postbox\Interfaces\ResponseInterface;
+    use Ueef\Assignable\Traits\AssignableTrait;
+    use Ueef\Assignable\Interfaces\AssignableInterface;
 
     class Response implements AssignableInterface, ResponseInterface
     {
@@ -13,22 +14,22 @@ namespace Ueef\Postbox {
         /**
          * @var array
          */
-        private $data;
+        private $data = [];
 
         /**
          * @var array
          */
-        private $address;
+        private $address = [];
 
         /**
          * @var integer
          */
-        private $error_code;
+        private $error_code = Exception::CODE_NONE;
 
         /**
          * @var string
          */
-        private $error_message;
+        private $error_message = '';
 
 
         public function getData(): array
