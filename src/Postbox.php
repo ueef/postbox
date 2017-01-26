@@ -32,9 +32,19 @@ namespace Ueef\Postbox {
 
                 try {
                     $request = $this->envelope->parseRequest($request);
+                    $data = call_user_func($handler, $request);
+
+                    if (null === $data) {
+                        $data = [];
+                    }
+
+                    if (!is_array($data)) {
+                        throw new Exception('Handler returns not an array', Exception::CODE_HANDLER);
+                    }
+
                     $response->assign([
                         'route' => $request->getRoute(),
-                        'data' => call_user_func($handler, $request),
+                        'data' => $data,
                     ]);
                 } catch (Throwable $e) {
                     $errorCode = $e->getCode();
