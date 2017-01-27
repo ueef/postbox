@@ -84,7 +84,7 @@ namespace Ueef\Postbox {
 
             return new Response([
                 'route' => $route,
-                'data' => $message['request'],
+                'data' => $message['response'],
                 'error_code' => $message['error']['code'],
                 'error_message' => $message['error']['message'],
             ]);
