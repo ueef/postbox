@@ -1,6 +1,6 @@
 <?php
 
-namespace Ueef\Postbox\Services {
+namespace Ueef\Postbox\Handlers {
 
     use Ueef\Postbox\Exceptions\Exception;
     use Ueef\Postbox\Interfaces\HandlerInterface;
