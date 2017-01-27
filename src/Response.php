@@ -24,7 +24,7 @@ namespace Ueef\Postbox {
         /**
          * @var integer
          */
-        private $error_code = Exception::CODE_NONE;
+        private $error_code = Exception::NONE;
 
         /**
          * @var string

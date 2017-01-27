@@ -39,7 +39,7 @@ namespace Ueef\Postbox {
                     }
 
                     if (!is_array($data)) {
-                        throw new Exception('Handler returns not an array', Exception::CODE_HANDLER);
+                        throw new Exception('Handler returns not an array', Exception::HANDLER);
                     }
 
                     $response->assign([
@@ -48,8 +48,8 @@ namespace Ueef\Postbox {
                     ]);
                 } catch (Throwable $e) {
                     $errorCode = $e->getCode();
-                    if (Exception::CODE_NONE == $errorCode) {
-                        $errorCode = Exception::CODE_UNKNOWN;
+                    if (Exception::NONE == $errorCode) {
+                        $errorCode = Exception::UNKNOWN;
                     }
 
                     $response->assign([

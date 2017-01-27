@@ -33,11 +33,11 @@ namespace Ueef\Postbox {
             $message = $this->encoder->decode($message);
 
             if (!$message) {
-                throw new Exception('Request is empty', Exception::CODE_REQUEST_EMPTY);
+                throw new Exception('Request is empty', Exception::REQUEST_EMPTY);
             }
 
             if (!$this->validateRequest($message)) {
-                throw new Exception('Wrong request format', Exception::CODE_REQUEST_FORMAT);
+                throw new Exception('Wrong request format', Exception::REQUEST_FORMAT);
             }
 
             $route = explode(':', $message['request']);
@@ -73,11 +73,11 @@ namespace Ueef\Postbox {
             $message = $this->encoder->decode($message);
 
             if (!$message) {
-                throw new Exception('Response is empty', Exception::CODE_RESPONSE_EMPTY);
+                throw new Exception('Response is empty', Exception::RESPONSE_EMPTY);
             }
 
             if (!$this->validateResponse($message)) {
-                throw new Exception('Wrong response format', Exception::CODE_RESPONSE_FORMAT);
+                throw new Exception('Wrong response format', Exception::RESPONSE_FORMAT);
             }
 
             $route = explode(':', $message['request']);
