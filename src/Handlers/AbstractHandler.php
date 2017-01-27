@@ -36,7 +36,7 @@ namespace Ueef\Postbox\Handlers {
 
         protected function getActionSuffix(): string
         {
-            return 'action';
+            return;
         }
     }
 }
