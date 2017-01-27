@@ -36,7 +36,7 @@ namespace Ueef\Postbox {
                 throw new Exception('Request is empty', Exception::CODE_REQUEST_EMPTY);
             }
 
-            if ($this->validateRequest($message)) {
+            if (!$this->validateRequest($message)) {
                 throw new Exception('Wrong request format', Exception::CODE_REQUEST_FORMAT);
             }
 
