@@ -26,17 +26,7 @@ namespace Ueef\Postbox\Handlers {
                 throw new Exception('Route is empty', Exception::CODE_HANDLER_ROUTE_EMPTY);
             }
 
-            $suffix = $this->getActionSuffix();
-            if ($suffix) {
-                $route[] = $suffix;
-            }
-
             return lcfirst(str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', implode(' ', $route)))));
-        }
-
-        protected function getActionSuffix(): string
-        {
-            return;
         }
     }
 }
