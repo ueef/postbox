@@ -31,7 +31,7 @@ namespace Ueef\Postbox\Handlers {
                 $route[] = $suffix;
             }
 
-            return lcfirst(str_replace('', ' ', ucwords(str_replace(['-', '_'], ' ', implode(' ', $route)))));
+            return lcfirst(str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', implode(' ', $route)))));
         }
 
         protected function getActionSuffix(): string
