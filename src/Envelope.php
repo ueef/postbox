@@ -92,12 +92,12 @@ namespace Ueef\Postbox {
 
         private function validateRequest(array $message)
         {
-            return array_diff(['request', 'data'], array_keys($message));
+            return !array_diff(['request', 'data'], array_keys($message));
         }
 
         private function validateResponse(array $message)
         {
-            return array_diff(['request', 'response', 'error'], array_keys($message));
+            return !array_diff(['request', 'response', 'error'], array_keys($message));
         }
     }
 }
