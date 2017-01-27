@@ -2,7 +2,7 @@
 
 namespace Ueef\Postbox\Handlers {
 
-    use Ueef\Postbox\Exceptions\Exception;
+    use Ueef\Postbox\Exceptions\HandlerException;
     use Ueef\Postbox\Interfaces\HandlerInterface;
     use Ueef\Postbox\Interfaces\RequestInterface;
 
@@ -13,7 +13,7 @@ namespace Ueef\Postbox\Handlers {
             $action = $this->getActionName($request->getRoute());
 
             if (!method_exists($this, $action)) {
-                throw new Exception('Route "' . $action . '" is undefined', Exception::HANDLER_ROUTE_UNDEFINED);
+                throw new HandlerException('Route "' . $action . '" is undefined');
             }
 
             return $this->{$action}($request->getData());
@@ -23,7 +23,7 @@ namespace Ueef\Postbox\Handlers {
         {
             $route = array_slice($route, 1);
             if (!$route) {
-                throw new Exception('Route is empty', Exception::HANDLER_ROUTE_EMPTY);
+                throw new HandlerException('Route is empty');
             }
 
             return lcfirst(str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', implode(' ', $route)))));

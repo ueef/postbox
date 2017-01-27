@@ -4,6 +4,7 @@ namespace Ueef\Postbox {
 
     use Throwable;
     use Ueef\Postbox\Exceptions\Exception;
+    use Ueef\Postbox\Exceptions\HandlerException;
     use Ueef\Postbox\Interfaces\DriverInterface;
     use Ueef\Postbox\Interfaces\PostboxInterface;
     use Ueef\Postbox\Interfaces\EnvelopeInterface;
@@ -39,7 +40,7 @@ namespace Ueef\Postbox {
                     }
 
                     if (!is_array($data)) {
-                        throw new Exception('Handler returns not an array', Exception::HANDLER);
+                        throw new HandlerException('Handler returns not an array');
                     }
 
                     $response->assign([
@@ -48,8 +49,8 @@ namespace Ueef\Postbox {
                     ]);
                 } catch (Throwable $e) {
                     $errorCode = $e->getCode();
-                    if (Exception::NONE == $errorCode) {
-                        $errorCode = Exception::UNKNOWN;
+                    if (HandlerException::NONE == $errorCode) {
+                        $errorCode = HandlerException::UNKNOWN;
                     }
 
                     $response->assign([
