@@ -13,7 +13,7 @@ namespace Ueef\Postbox\Handlers {
             $action = $this->getActionName($request->getRoute());
 
             if (!method_exists($this, $action)) {
-                throw new Exception('Route is undefined', Exception::CODE_HANDLER_ROUTE_UNDEFINED);
+                throw new Exception('Route "' . $action . '" is undefined', Exception::CODE_HANDLER_ROUTE_UNDEFINED);
             }
 
             return $this->{$action}($request->getData());
