@@ -33,6 +33,11 @@ namespace Ueef\Postbox {
 
                 try {
                     $request = $this->envelope->parseRequest($request);
+
+                    $response->assign([
+                        'route' => $request->getRoute(),
+                    ]);
+
                     $data = call_user_func($handler, $request);
 
                     if (null === $data) {
