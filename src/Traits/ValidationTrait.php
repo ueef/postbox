@@ -1,6 +1,6 @@
 <?php
 
-namespace Postbox\Traits {
+namespace Ueef\Postbox\Traits {
 
     trait ValidationTrait
     {
