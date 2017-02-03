@@ -2,6 +2,8 @@
 
 namespace Ueef\Postbox {
 
+    use Ueef\Postbox\Exceptions\Exception;
+    use Ueef\Postbox\Exceptions\HandlerException;
     use Ueef\Postbox\Interfaces\DriverInterface;
     use Ueef\Postbox\Interfaces\PostmanInterface;
     use Ueef\Postbox\Interfaces\EnvelopeInterface;
@@ -35,8 +37,14 @@ namespace Ueef\Postbox {
         public function request(array $route, array $data): ResponseInterface
         {
             $request = $this->makeRequest($route, $data);
+            $response = $this->driver->request($request->getQueue(), $this->envelope->makeRequest($request));
+            $response = $this->envelope->parseResponse($response);
 
-            return $this->envelope->parseResponse($this->driver->request($request->getQueue(), $this->envelope->makeRequest($request)));
+            if (Exception::NONE !== $response->getErrorCode()) {
+                throw new HandlerException($response->getErrorMessage(), $response->getErrorCode());
+            }
+
+            return $response;
         }
 
         private function makeRequest(array $route, array $data): RequestInterface
