@@ -34,7 +34,7 @@ namespace Ueef\Postbox {
             $this->driver->send($request->getQueue(), $this->envelope->makeRequest($request));
         }
 
-        public function request(array $route, array $data): ResponseInterface
+        public function request(array $route, array $data): array
         {
             $request = $this->makeRequest($route, $data);
             $response = $this->driver->request($request->getQueue(), $this->envelope->makeRequest($request));
@@ -44,7 +44,7 @@ namespace Ueef\Postbox {
                 throw new HandlerException($response->getErrorMessage(), $response->getErrorCode());
             }
 
-            return $response;
+            return $response->getData();
         }
 
         private function makeRequest(array $route, array $data): RequestInterface
