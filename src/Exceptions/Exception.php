@@ -11,7 +11,7 @@ namespace Ueef\Postbox\Exceptions {
 
         public function __construct($message = "", $code = null, Throwable $previous = null)
         {
-            if ($code) {
+            if (!$code) {
                 $code = static::UNKNOWN;
             }
 
