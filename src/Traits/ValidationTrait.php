@@ -4,7 +4,7 @@ namespace Ueef\Postbox\Traits {
 
     trait ValidationTrait
     {
-        private function validate(array $data, array $validators)
+        protected function validate(array $data, array $validators)
         {
             foreach ($validators as $validator => $fields) {
                 if (!$fields) {
