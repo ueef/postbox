@@ -56,5 +56,14 @@ namespace Ueef\Postbox\Traits {
 
             return false;
         }
+
+        private function validateIsNumeric(string $field, array $data)
+        {
+            if (isset($data[$field]) && !is_numeric($data[$field])) {
+                return '"' . $field . '" is not an number';
+            }
+
+            return false;
+        }
     }
 }
