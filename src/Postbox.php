@@ -39,7 +39,7 @@ namespace Ueef\Postbox {
                 $request = $this->envelope->parseRequest($request);
                 $this->tracer->setId(null);
                 $this->tracer->setTraceId($request->getTraceId());
-                $this->tracer->setTraceName($request->getQueue());
+                $this->tracer->setTraceName(implode('.', $request->getRoute()));
                 $this->tracer->startTracing();
 
                 try {
