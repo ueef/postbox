@@ -11,6 +11,7 @@ namespace Ueef\Postbox {
     use Ueef\Postbox\Interfaces\ResponseInterface;
     use Ueef\Assignable\Traits\AssignableTrait;
     use Ueef\Assignable\Interfaces\AssignableInterface;
+    use Ueef\Postbox\Interfaces\TracerInterface;
 
     class Postman implements AssignableInterface, PostmanInterface
     {
@@ -26,6 +27,10 @@ namespace Ueef\Postbox {
          */
         private $envelope;
 
+        /**
+         * @var TracerInterface
+         */
+        private $tracer;
 
         public function send(array $route, array $data)
         {
@@ -53,6 +58,7 @@ namespace Ueef\Postbox {
                 'route' => $route,
                 'queue' => reset($route),
                 'data' => $data,
+                'traceId' => $this->tracer->getTraceIdOrGenerate()
             ]);
         }
     }

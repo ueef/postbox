@@ -10,6 +10,7 @@ namespace Ueef\Postbox {
     use Ueef\Postbox\Interfaces\EnvelopeInterface;
     use Ueef\Assignable\Traits\AssignableTrait;
     use Ueef\Assignable\Interfaces\AssignableInterface;
+    use Ueef\Postbox\Interfaces\TracerInterface;
 
     class Postbox implements AssignableInterface, PostboxInterface
     {
@@ -25,19 +26,23 @@ namespace Ueef\Postbox {
          */
         private $envelope;
 
+        /**
+         * @var TracerInterface
+         */
+        private $tracer;
 
         public function wait(string $from, callable $handler)
         {
             $this->driver->wait($from, function (string $request) use ($handler) {
+
                 $response = new Response();
+                $request = $this->envelope->parseRequest($request);
+                $this->tracer->setId(null);
+                $this->tracer->setTraceId($request->getTraceId());
+                $this->tracer->setTraceName($request->getQueue());
+                $this->tracer->startTracing();
 
                 try {
-                    $request = $this->envelope->parseRequest($request);
-
-                    $response->assign([
-                        'route' => $request->getRoute(),
-                    ]);
-
                     $data = call_user_func($handler, $request);
 
                     if (null === $data) {
@@ -54,16 +59,21 @@ namespace Ueef\Postbox {
                     ]);
                 } catch (Throwable $e) {
                     $errorCode = $e->getCode();
+                    $errorMessage = $e->getMessage();
                     if (HandlerException::NONE == $errorCode) {
                         $errorCode = HandlerException::UNKNOWN;
                     }
 
                     $response->assign([
                         'error_code' => $errorCode,
-                        'error_message' => $e->getMessage(),
+                        'error_message' => $errorMessage,
                     ]);
+
+                    $this->tracer->setTraceMessage("code: $errorCode message: $errorMessage");
                 }
 
+                $this->tracer->stopTracing();
+                $this->tracer->saveTrace();
                 return $this->envelope->makeResponse($response);
             });
         }

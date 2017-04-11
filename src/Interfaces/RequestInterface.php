@@ -7,6 +7,7 @@ namespace Ueef\Postbox\Interfaces {
         public function getData(): array;
         public function getRoute(): array;
         public function getQueue(): string;
+        public function getTraceId(): string;
     }
 }
 

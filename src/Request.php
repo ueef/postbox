@@ -25,6 +25,10 @@ namespace Ueef\Postbox {
          */
         private $queue;
 
+        /**
+         * @var string
+         */
+        private $traceId;
 
         public function getData(): array
         {
@@ -39,6 +43,11 @@ namespace Ueef\Postbox {
         public function getQueue(): string
         {
             return $this->queue;
+        }
+
+        public function getTraceId(): string
+        {
+            return $this->traceId;
         }
     }
 }

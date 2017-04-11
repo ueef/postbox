@@ -27,6 +27,7 @@ namespace Ueef\Postbox {
             return $this->encoder->encode([
                 'request' => implode(':', $request->getRoute()),
                 'data' => $request->getData(),
+                'trace_id' => $request->getTraceId()
             ]);
         }
 
@@ -48,6 +49,7 @@ namespace Ueef\Postbox {
                 'route' => $route,
                 'queue' => reset($route),
                 'data' => $message['data'],
+                'traceId' => $message['trace_id']
             ]);
         }
 
