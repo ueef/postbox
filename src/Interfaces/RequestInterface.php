@@ -8,6 +8,8 @@ namespace Ueef\Postbox\Interfaces {
         public function getRoute(): array;
         public function getQueue(): string;
         public function getTraceId(): string;
+        public function getSpanId(): string;
+        public function getParentSpanId(): string;
     }
 }
 

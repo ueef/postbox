@@ -33,14 +33,16 @@ namespace Ueef\Postbox {
 
         public function wait(string $from, callable $handler)
         {
-            $this->driver->wait($from, function (string $request) use ($handler) {
+            $this->driver->wait($from, function (string $encodedRequest) use ($handler) {
 
                 $response = new Response();
-                $request = $this->envelope->parseRequest($request);
-                $this->tracer->setId(null);
+                $request = $this->envelope->parseRequest($encodedRequest);
+
                 $this->tracer->setTraceId($request->getTraceId());
-                $this->tracer->setTraceName(implode('.', $request->getRoute()));
-                $this->tracer->startTracing();
+                $this->tracer->setSpanName(implode('.', $request->getRoute()));
+                $this->tracer->setSpanId($request->getSpanId());
+                $this->tracer->setParentSpanId($request->getParentSpanId());
+                $this->tracer->log(TracerInterface::EVENT_START, $encodedRequest);
 
                 try {
                     $data = call_user_func($handler, $request);
@@ -68,13 +70,12 @@ namespace Ueef\Postbox {
                         'error_code' => $errorCode,
                         'error_message' => $errorMessage,
                     ]);
-
-                    $this->tracer->setTraceMessage("code: $errorCode message: $errorMessage");
                 }
 
-                $this->tracer->stopTracing();
-                $this->tracer->saveTrace();
-                return $this->envelope->makeResponse($response);
+                $encodedResponse = $this->envelope->makeResponse($response);
+                $this->tracer->log(TracerInterface::EVENT_COMPLETE, $encodedResponse);
+
+                return $encodedResponse;
             });
         }
     }

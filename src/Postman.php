@@ -35,15 +35,22 @@ namespace Ueef\Postbox {
         public function send(array $route, array $data)
         {
             $request = $this->makeRequest($route, $data);
+            $encodedRequest = $this->envelope->makeRequest($request);
 
+            $this->tracer->log(TracerInterface::EVENT_SEND, $encodedRequest);
             $this->driver->send($request->getQueue(), $this->envelope->makeRequest($request));
         }
 
         public function request(array $route, array $data): array
         {
             $request = $this->makeRequest($route, $data);
-            $response = $this->driver->request($request->getQueue(), $this->envelope->makeRequest($request));
-            $response = $this->envelope->parseResponse($response);
+            $encodedRequest = $this->envelope->makeRequest($request);
+
+            $this->tracer->log(TracerInterface::EVENT_SEND, $encodedRequest);
+            $encodedResponse = $this->driver->request($request->getQueue(), $encodedRequest);
+            $this->tracer->log(TracerInterface::EVENT_RECEIVE, $encodedResponse);
+
+            $response = $this->envelope->parseResponse($encodedResponse);
 
             if (Exception::NONE !== $response->getErrorCode()) {
                 throw new HandlerException($response->getErrorMessage(), $response->getErrorCode());
@@ -58,7 +65,9 @@ namespace Ueef\Postbox {
                 'route' => $route,
                 'queue' => reset($route),
                 'data' => $data,
-                'traceId' => $this->tracer->getTraceIdOrGenerate()
+                'traceId' => $this->tracer->getTraceId(),
+                'spanId' => $this->tracer->createNewSpanId(),
+                'parentSpanId' => $this->tracer->getSpanId()
             ]);
         }
     }

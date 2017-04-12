@@ -30,6 +30,16 @@ namespace Ueef\Postbox {
          */
         private $traceId;
 
+        /**
+         * @var string
+         */
+        private $spanId;
+
+        /**
+         * @var string
+         */
+        private $parentSpanId;
+
         public function getData(): array
         {
             return $this->data;
@@ -48,6 +58,16 @@ namespace Ueef\Postbox {
         public function getTraceId(): string
         {
             return $this->traceId;
+        }
+
+        public function getSpanId(): string
+        {
+            return $this->spanId;
+        }
+
+        public function getParentSpanId(): string
+        {
+            return $this->parentSpanId;
         }
     }
 }
