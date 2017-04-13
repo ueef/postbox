@@ -39,7 +39,7 @@ namespace Ueef\Postbox {
                 $request = $this->envelope->parseRequest($encodedRequest);
 
                 $this->tracer->setTraceId($request->getTraceId());
-                $this->tracer->setSpanName(implode('.', $request->getRoute()));
+                $this->tracer->setSpanName($request->getSpanName());
                 $this->tracer->setSpanId($request->getSpanId());
                 $this->tracer->setParentSpanId($request->getParentSpanId());
                 $this->tracer->log(TracerInterface::EVENT_START, $encodedRequest);

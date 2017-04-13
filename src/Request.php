@@ -38,6 +38,11 @@ namespace Ueef\Postbox {
         /**
          * @var string
          */
+        private $spanName;
+
+        /**
+         * @var string
+         */
         private $parentSpanId;
 
         public function getData(): array
@@ -63,6 +68,11 @@ namespace Ueef\Postbox {
         public function getSpanId(): string
         {
             return $this->spanId;
+        }
+
+        public function getSpanName(): string
+        {
+            return $this->spanName;
         }
 
         public function getParentSpanId(): string

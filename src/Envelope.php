@@ -29,6 +29,7 @@ namespace Ueef\Postbox {
                 'data' => $request->getData(),
                 'trace_id' => $request->getTraceId(),
                 'span_id' => $request->getSpanId(),
+                'span_name' => $request->getSpanName(),
                 'parent_span_id' => $request->getParentSpanId()
             ]);
         }
@@ -53,6 +54,7 @@ namespace Ueef\Postbox {
                 'data' => $message['data'],
                 'traceId' => $message['trace_id'],
                 'spanId' => $message['span_id'],
+                'spanName' => $message['span_name'],
                 'parentSpanId' => $message['parent_span_id']
             ]);
         }
