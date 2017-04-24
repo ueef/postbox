@@ -48,6 +48,23 @@ namespace Ueef\Postbox\Traits {
             return false;
         }
 
+        private function validateIsIntegerArray(string $field, array $data)
+        {
+            if (isset($data[$field])) {
+                if (!is_array($data[$field])) {
+                    return sprintf('"%s" is not an array', $field);
+                }
+
+                foreach ($data[$field] as $value) {
+                    if (!is_integer($value)) {
+                        return sprintf('"%s" is not an integer array', $field);
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private function validateIsInteger(string $field, array $data)
         {
             if (isset($data[$field]) && !is_integer($data[$field])) {
