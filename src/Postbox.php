@@ -82,6 +82,10 @@ namespace Ueef\Postbox {
                     ]);
                 }
 
+                if ($this->verbose) {
+                    echo $response . PHP_EOL . PHP_EOL;
+                }
+
                 $encodedResponse = $this->envelope->makeResponse($response);
                 $this->tracer->log(TracerInterface::EVENT_COMPLETE, $encodedResponse);
 
