@@ -17,6 +17,11 @@ namespace Ueef\Postbox {
         use AssignableTrait;
 
         /**
+         * @var bool
+         */
+        private $verbose = false;
+
+        /**
          * @var DriverInterface
          */
         private $driver;
@@ -31,12 +36,17 @@ namespace Ueef\Postbox {
          */
         private $tracer;
 
+
         public function wait(string $from, callable $handler)
         {
             $this->driver->wait($from, function (string $encodedRequest) use ($handler) {
 
                 $response = new Response();
                 $request = $this->envelope->parseRequest($encodedRequest);
+
+                if ($this->verbose) {
+                    echo $request . PHP_EOL . PHP_EOL;
+                }
 
                 $this->tracer->setTraceId($request->getTraceId());
                 $this->tracer->setSpanName($request->getSpanName());
