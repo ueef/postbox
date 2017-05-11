@@ -35,8 +35,8 @@ namespace Ueef\Postbox {
         public function __toString(): string
         {
             return (
-                json_encode($this->getData(), JSON_PRETTY_PRINT) . PHP_EOL .
-                json_encode(['code' => $this->getErrorCode(), 'message' => $this->getErrorMessage()], JSON_PRETTY_PRINT)
+                json_encode($this->getData(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . PHP_EOL .
+                json_encode(['code' => $this->getErrorCode(), 'message' => $this->getErrorMessage()], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
             );
         }
 

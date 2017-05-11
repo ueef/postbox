@@ -10,7 +10,7 @@ namespace Ueef\Postbox\Encoders {
     {
         public function encode(array $message): string
         {
-            return json_encode($message);
+            return json_encode($message, JSON_UNESCAPED_UNICODE);
         }
 
         public function decode(string $message): array
