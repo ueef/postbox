@@ -34,7 +34,10 @@ namespace Ueef\Postbox {
 
         public function __toString(): string
         {
-            return implode('.', $this->getRoute()) . PHP_EOL . json_encode($this->getData(), JSON_PRETTY_PRINT) . PHP_EOL;
+            return json_encode($this->getData(), JSON_PRETTY_PRINT) . PHP_EOL . json_encode([
+                'code' => $this->getErrorCode(),
+                'message' => $this->getErrorMessage(),
+            ]);
         }
 
         public function getData(): array
