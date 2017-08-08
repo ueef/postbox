@@ -7,7 +7,7 @@ namespace Ueef\Postbox {
     use Ueef\Assignable\Traits\AssignableTrait;
     use Ueef\Assignable\Interfaces\AssignableInterface;
 
-    class Response implements AssignableInterface, ResponseInterface
+    class Response implements ResponseInterface
     {
         use AssignableTrait;
 

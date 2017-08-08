@@ -2,7 +2,9 @@
 
 namespace Ueef\Postbox\Interfaces {
 
-    interface RequestInterface
+    use Ueef\Assignable\Interfaces\AssignableInterface;
+
+    interface RequestInterface extends AssignableInterface
     {
         public function __toString(): string;
         public function getData(): array;

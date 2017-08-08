@@ -6,7 +6,7 @@ namespace Ueef\Postbox {
     use Ueef\Assignable\Traits\AssignableTrait;
     use Ueef\Postbox\Interfaces\RequestInterface;
 
-    class Request implements AssignableInterface, RequestInterface
+    class Request implements RequestInterface
     {
         use AssignableTrait;
 
