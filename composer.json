@@ -3,7 +3,8 @@
   "type": "library",
   "require": {
     "php": ">=7.0.1",
-    "ueef/assignable": "*"
+    "ueef/assignable": "*",
+    "jcchavezs/zipkin": "dev-master"
   },
   "autoload": {
     "psr-4": {

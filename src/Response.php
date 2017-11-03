@@ -5,7 +5,6 @@ namespace Ueef\Postbox {
     use Ueef\Postbox\Exceptions\Exception;
     use Ueef\Postbox\Interfaces\ResponseInterface;
     use Ueef\Assignable\Traits\AssignableTrait;
-    use Ueef\Assignable\Interfaces\AssignableInterface;
 
     class Response implements ResponseInterface
     {

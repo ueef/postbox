@@ -2,6 +2,7 @@
 
 namespace Ueef\Postbox {
 
+    use ArrayObject;
     use Ueef\Postbox\Exceptions\Exception;
     use Ueef\Postbox\Exceptions\HandlerException;
     use Ueef\Postbox\Interfaces\DriverInterface;
@@ -11,7 +12,12 @@ namespace Ueef\Postbox {
     use Ueef\Postbox\Interfaces\ResponseInterface;
     use Ueef\Assignable\Traits\AssignableTrait;
     use Ueef\Assignable\Interfaces\AssignableInterface;
-    use Ueef\Postbox\Interfaces\TracerInterface;
+    use const Zipkin\Kind\CLIENT;
+    use const Zipkin\Kind\PRODUCER;
+    use Zipkin\Propagation\Map;
+    use function Zipkin\Timestamp\now;
+    use Zipkin\TraceContext;
+    use Zipkin\Tracing;
 
     class Postman implements AssignableInterface, PostmanInterface
     {
@@ -28,31 +34,54 @@ namespace Ueef\Postbox {
         private $envelope;
 
         /**
-         * @var TracerInterface
+         * @var TraceContext
          */
-        private $tracer;
+        private $incomingContext;
+
+        /**
+         * @var Tracing
+         */
+        private $tracing;
 
         public function send(array $route, array $data)
         {
-            $this->tracer->spanBegin(implode('.', $route));
             $request = $this->makeRequest($route, $data);
+
+            $tracer = $this->tracing->getTracer();
+            $span = $tracer->newChild($this->incomingContext);
+            $span->setKind(PRODUCER);
+            $span->setName(implode(':', $request->getRoute()));
+            $context = new ArrayObject();
+            $injector = $this->tracing->getPropagation()->getInjector(new Map());
+            $injector($span->getContext(), $context);
+
+            $request->assign(['contest' => (array)$context]);
             $encodedRequest = $this->envelope->makeRequest($request);
 
-            $this->tracer->log(TracerInterface::EVENT_SEND, $encodedRequest);
+            $span->start(now());
             $this->driver->send($request->getQueue(), $encodedRequest);
-            $this->tracer->spanEnd();
+            $tracer->flush();
         }
 
         public function request(array $route, array $data): array
         {
-            $this->tracer->spanBegin(implode('.', $route));
             $request = $this->makeRequest($route, $data);
+
+            $tracer = $this->tracing->getTracer();
+            $span = $tracer->newChild($this->incomingContext);
+            $span->setKind(CLIENT);
+            $span->setName(implode(':', $request->getRoute()));
+            $context = new ArrayObject();
+            $injector = $this->tracing->getPropagation()->getInjector(new Map());
+            $injector($span->getContext(), $context);
+
+            $request->assign(['contest' => (array)$context]);
             $encodedRequest = $this->envelope->makeRequest($request);
 
-            $this->tracer->log(TracerInterface::EVENT_SEND, $encodedRequest);
+            $span->start(now());
             $encodedResponse = $this->driver->request($request->getQueue(), $encodedRequest);
-            $this->tracer->log(TracerInterface::EVENT_RECEIVE, $encodedResponse);
-            $this->tracer->spanEnd();
+            $span->finish(now());
+            $tracer->flush();
 
             $response = $this->envelope->parseResponse($encodedResponse);
 
@@ -69,10 +98,6 @@ namespace Ueef\Postbox {
                 'route' => $route,
                 'queue' => reset($route),
                 'data' => $data,
-                'traceId' => $this->tracer->getTraceId(),
-                'spanId' => $this->tracer->getSpanId(),
-                'spanName' => $this->tracer->getSpanName(),
-                'parentSpanId' => $this->tracer->getParentSpanId()
             ]);
         }
     }

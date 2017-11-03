@@ -2,6 +2,7 @@
 
 namespace Ueef\Postbox {
 
+    use ArrayObject;
     use Throwable;
     use Ueef\Postbox\Exceptions\Exception;
     use Ueef\Postbox\Exceptions\HandlerException;
@@ -10,7 +11,11 @@ namespace Ueef\Postbox {
     use Ueef\Postbox\Interfaces\EnvelopeInterface;
     use Ueef\Assignable\Traits\AssignableTrait;
     use Ueef\Assignable\Interfaces\AssignableInterface;
-    use Ueef\Postbox\Interfaces\TracerInterface;
+    use const Zipkin\Kind\SERVER;
+    use Zipkin\Propagation\Map;
+    use function Zipkin\Timestamp\now;
+    use Zipkin\TraceContext;
+    use Zipkin\Tracing;
 
     class Postbox implements AssignableInterface, PostboxInterface
     {
@@ -32,9 +37,14 @@ namespace Ueef\Postbox {
         private $envelope;
 
         /**
-         * @var TracerInterface
+         * @var TraceContext
          */
-        private $tracer;
+        private $incomingContext;
+
+        /**
+         * @var Tracing
+         */
+        private $tracing;
 
 
         public function wait(string $from, callable $handler)
@@ -48,14 +58,19 @@ namespace Ueef\Postbox {
                     echo $request . PHP_EOL . PHP_EOL;
                 }
 
-                $this->tracer->setTraceId($request->getTraceId());
-                $this->tracer->setSpanName($request->getSpanName());
-                $this->tracer->setSpanId($request->getSpanId());
-                $this->tracer->setParentSpanId($request->getParentSpanId());
-                $this->tracer->log(TracerInterface::EVENT_START, $encodedRequest);
+                $extractor = $this->tracing->getPropagation()->getExtractor(new Map());
+                $this->incomingContext = $extractor(new ArrayObject($request->getContext()));
+                $tracer = $this->tracing->getTracer();
+                $span = $tracer->joinSpan($this->incomingContext);
+                $span->setKind(SERVER);
+                $span->setName(implode(':', $request->getRoute()));
+                $span->start(now());
 
                 try {
+                    $span->start(now());
                     $data = call_user_func($handler, $request);
+                    $span->finish(now());
+                    $tracer->flush();
 
                     if (null === $data) {
                         $data = [];
@@ -87,8 +102,6 @@ namespace Ueef\Postbox {
                 }
 
                 $encodedResponse = $this->envelope->makeResponse($response);
-                $this->tracer->log(TracerInterface::EVENT_COMPLETE, $encodedResponse);
-
                 return $encodedResponse;
             });
         }

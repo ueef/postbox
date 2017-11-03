@@ -2,7 +2,6 @@
 
 namespace Ueef\Postbox {
 
-    use Ueef\Assignable\Interfaces\AssignableInterface;
     use Ueef\Assignable\Traits\AssignableTrait;
     use Ueef\Postbox\Interfaces\RequestInterface;
 
@@ -26,24 +25,9 @@ namespace Ueef\Postbox {
         private $queue;
 
         /**
-         * @var string
+         * @var array
          */
-        private $traceId;
-
-        /**
-         * @var string
-         */
-        private $spanId;
-
-        /**
-         * @var string
-         */
-        private $spanName;
-
-        /**
-         * @var string
-         */
-        private $parentSpanId;
+        private $context;
 
 
         public function __toString(): string
@@ -66,24 +50,9 @@ namespace Ueef\Postbox {
             return $this->queue;
         }
 
-        public function getTraceId(): string
+        public function getContext(): array
         {
-            return $this->traceId;
-        }
-
-        public function getSpanId(): string
-        {
-            return $this->spanId;
-        }
-
-        public function getSpanName(): string
-        {
-            return $this->spanName;
-        }
-
-        public function getParentSpanId(): string
-        {
-            return $this->parentSpanId;
+            return $this->context;
         }
     }
 }

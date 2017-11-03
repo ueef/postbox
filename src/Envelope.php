@@ -27,10 +27,7 @@ namespace Ueef\Postbox {
             return $this->encoder->encode([
                 'request' => implode(':', $request->getRoute()),
                 'data' => $request->getData(),
-                'trace_id' => $request->getTraceId(),
-                'span_id' => $request->getSpanId(),
-                'span_name' => $request->getSpanName(),
-                'parent_span_id' => $request->getParentSpanId()
+                'context' => $request->getContext()
             ]);
         }
 
@@ -52,10 +49,7 @@ namespace Ueef\Postbox {
                 'route' => $route,
                 'queue' => reset($route),
                 'data' => $message['data'],
-                'traceId' => $message['trace_id'],
-                'spanId' => $message['span_id'],
-                'spanName' => $message['span_name'],
-                'parentSpanId' => $message['parent_span_id']
+                'context' => $message['context']
             ]);
         }
 
