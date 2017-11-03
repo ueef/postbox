@@ -64,7 +64,6 @@ namespace Ueef\Postbox {
                 $span = $tracer->joinSpan($this->incomingContext);
                 $span->setKind(SERVER);
                 $span->setName(implode(':', $request->getRoute()));
-                $span->start(now());
 
                 try {
                     $span->start(now());
