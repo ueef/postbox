@@ -5,18 +5,17 @@ namespace Ueef\Postbox {
     use ArrayObject;
     use Ueef\Postbox\Exceptions\Exception;
     use Ueef\Postbox\Exceptions\HandlerException;
+    use Ueef\Postbox\Interfaces\ContextContainerInterface;
     use Ueef\Postbox\Interfaces\DriverInterface;
     use Ueef\Postbox\Interfaces\PostmanInterface;
     use Ueef\Postbox\Interfaces\EnvelopeInterface;
     use Ueef\Postbox\Interfaces\RequestInterface;
-    use Ueef\Postbox\Interfaces\ResponseInterface;
     use Ueef\Assignable\Traits\AssignableTrait;
     use Ueef\Assignable\Interfaces\AssignableInterface;
     use const Zipkin\Kind\CLIENT;
     use const Zipkin\Kind\PRODUCER;
     use Zipkin\Propagation\Map;
     use function Zipkin\Timestamp\now;
-    use Zipkin\TraceContext;
     use Zipkin\Tracing;
 
     class Postman implements AssignableInterface, PostmanInterface
@@ -34,9 +33,9 @@ namespace Ueef\Postbox {
         private $envelope;
 
         /**
-         * @var TraceContext
+         * @var ContextContainerInterface
          */
-        private $incomingContext;
+        private $contextContainer;
 
         /**
          * @var Tracing
@@ -48,7 +47,7 @@ namespace Ueef\Postbox {
             $request = $this->makeRequest($route, $data);
 
             $tracer = $this->tracing->getTracer();
-            $span = $tracer->newChild($this->incomingContext);
+            $span = $tracer->newChild($this->contextContainer->getContext());
             $span->setKind(PRODUCER);
             $span->setName(implode(':', $request->getRoute()));
             $context = new ArrayObject();
@@ -68,7 +67,7 @@ namespace Ueef\Postbox {
             $request = $this->makeRequest($route, $data);
 
             $tracer = $this->tracing->getTracer();
-            $span = $tracer->newChild($this->incomingContext);
+            $span = $tracer->newChild($this->contextContainer->getContext());
             $span->setKind(CLIENT);
             $span->setName(implode(':', $request->getRoute()));
             $context = new ArrayObject();

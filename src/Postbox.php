@@ -6,6 +6,7 @@ namespace Ueef\Postbox {
     use Throwable;
     use Ueef\Postbox\Exceptions\Exception;
     use Ueef\Postbox\Exceptions\HandlerException;
+    use Ueef\Postbox\Interfaces\ContextContainerInterface;
     use Ueef\Postbox\Interfaces\DriverInterface;
     use Ueef\Postbox\Interfaces\PostboxInterface;
     use Ueef\Postbox\Interfaces\EnvelopeInterface;
@@ -14,7 +15,6 @@ namespace Ueef\Postbox {
     use const Zipkin\Kind\SERVER;
     use Zipkin\Propagation\Map;
     use function Zipkin\Timestamp\now;
-    use Zipkin\TraceContext;
     use Zipkin\Tracing;
 
     class Postbox implements AssignableInterface, PostboxInterface
@@ -37,9 +37,9 @@ namespace Ueef\Postbox {
         private $envelope;
 
         /**
-         * @var TraceContext
+         * @var ContextContainerInterface
          */
-        private $incomingContext;
+        private $contextContainer;
 
         /**
          * @var Tracing
@@ -59,9 +59,9 @@ namespace Ueef\Postbox {
                 }
 
                 $extractor = $this->tracing->getPropagation()->getExtractor(new Map());
-                $this->incomingContext = $extractor(new ArrayObject($request->getContext()));
+                $this->contextContainer->setContext($extractor(new ArrayObject($request->getContext())));
                 $tracer = $this->tracing->getTracer();
-                $span = $tracer->joinSpan($this->incomingContext);
+                $span = $tracer->joinSpan($this->contextContainer->getContext());
                 $span->setKind(SERVER);
                 $span->setName(implode(':', $request->getRoute()));
 
