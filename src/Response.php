@@ -10,24 +10,16 @@ namespace Ueef\Postbox {
     {
         use AssignableTrait;
 
-        /**
-         * @var array
-         */
+        /** @var array */
         private $data = [];
 
-        /**
-         * @var array
-         */
+        /** @var array */
         private $route = [];
 
-        /**
-         * @var integer
-         */
+        /** @var integer */
         private $error_code = Exception::NONE;
 
-        /**
-         * @var string
-         */
+        /** @var string */
         private $error_message = '';
 
 

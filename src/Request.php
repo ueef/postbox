@@ -9,24 +9,16 @@ namespace Ueef\Postbox {
     {
         use AssignableTrait;
 
-        /**
-         * @var array
-         */
+        /** @var array */
         private $data;
 
-        /**
-         * @var array
-         */
+        /** @var array */
         private $route;
 
-        /**
-         * @var string
-         */
+        /** @var string */
         private $queue;
 
-        /**
-         * @var array
-         */
+        /** @var array */
         private $context;
 
 
@@ -50,7 +42,12 @@ namespace Ueef\Postbox {
             return $this->queue;
         }
 
-        public function getContext(): array
+        public function setContext(array $context)
+        {
+            $this->context = $context;
+        }
+
+        public function getContext(): ?array
         {
             return $this->context;
         }

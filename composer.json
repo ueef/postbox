@@ -1,9 +1,10 @@
 {
   "name": "ueef/postbox",
   "type": "library",
+  "description": "",
   "require": {
-    "php": ">=7.0.1",
-    "ueef/assignable": "*",
+    "php": ">=7.1",
+    "ueef/assignable": "^0.0.4",
     "jcchavezs/zipkin": "dev-master"
   },
   "autoload": {

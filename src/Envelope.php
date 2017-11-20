@@ -16,9 +16,7 @@ namespace Ueef\Postbox {
     {
         use AssignableTrait;
 
-        /**
-         * @var EncoderInterface
-         */
+        /** @var EncoderInterface */
         private $encoder;
 
 

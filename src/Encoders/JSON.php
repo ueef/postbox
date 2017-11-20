@@ -3,7 +3,6 @@
 namespace Ueef\Postbox\Encoders {
 
     use Ueef\Postbox\Exceptions\EncoderException;
-    use Ueef\Postbox\Exceptions\Exception;
     use Ueef\Postbox\Interfaces\EncoderInterface;
 
     class JSON implements EncoderInterface

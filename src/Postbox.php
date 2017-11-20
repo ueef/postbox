@@ -2,74 +2,42 @@
 
 namespace Ueef\Postbox {
 
-    use ArrayObject;
     use Throwable;
-    use Ueef\Postbox\Exceptions\Exception;
     use Ueef\Postbox\Exceptions\HandlerException;
-    use Ueef\Postbox\Interfaces\ContextContainerInterface;
+    use Ueef\Postbox\Interfaces\TracerInterface;
     use Ueef\Postbox\Interfaces\DriverInterface;
     use Ueef\Postbox\Interfaces\PostboxInterface;
     use Ueef\Postbox\Interfaces\EnvelopeInterface;
     use Ueef\Assignable\Traits\AssignableTrait;
     use Ueef\Assignable\Interfaces\AssignableInterface;
-    use const Zipkin\Kind\SERVER;
-    use Zipkin\Propagation\Map;
-    use function Zipkin\Timestamp\now;
-    use Zipkin\Tracing;
 
     class Postbox implements AssignableInterface, PostboxInterface
     {
         use AssignableTrait;
 
-        /**
-         * @var bool
-         */
-        private $verbose = false;
+        /** @var TracerInterface */
+        private $tracer = null;
 
-        /**
-         * @var DriverInterface
-         */
+        /** @var DriverInterface */
         private $driver;
 
-        /**
-         * @var EnvelopeInterface
-         */
+        /** @var EnvelopeInterface */
         private $envelope;
-
-        /**
-         * @var ContextContainerInterface
-         */
-        private $contextContainer;
-
-        /**
-         * @var Tracing
-         */
-        private $tracing;
 
 
         public function wait(string $from, callable $handler)
         {
             $this->driver->wait($from, function (string $encodedRequest) use ($handler) {
 
-                $response = new Response();
                 $request = $this->envelope->parseRequest($encodedRequest);
 
-                if ($this->verbose) {
-                    echo $request . PHP_EOL . PHP_EOL;
+                if ($this->tracer) {
+                    $this->tracer->spanStart($this->tracer::TYPE_HANDLING, $request);
                 }
 
-                $extractor = $this->tracing->getPropagation()->getExtractor(new Map());
-                $this->contextContainer->setContext($extractor(new ArrayObject($request->getContext())));
-                $tracer = $this->tracing->getTracer();
-                $span = $tracer->joinSpan($this->contextContainer->getContext());
-                $span->setKind(SERVER);
-                $span->setName(implode(':', $request->getRoute()));
-
+                $response = new Response();
                 try {
-                    $span->start(now());
                     $data = call_user_func($handler, $request);
-                    $span->finish(now());
-                    $tracer->flush();
 
                     if (null === $data) {
                         $data = [];
@@ -96,12 +64,11 @@ namespace Ueef\Postbox {
                     ]);
                 }
 
-                if ($this->verbose) {
-                    echo $response . PHP_EOL . PHP_EOL;
+                if ($this->tracer) {
+                    $this->tracer->spanFinish($response);
                 }
 
-                $encodedResponse = $this->envelope->makeResponse($response);
-                return $encodedResponse;
+                return $this->envelope->makeResponse($response);
             });
         }
     }

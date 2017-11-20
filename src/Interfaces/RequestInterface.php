@@ -10,7 +10,8 @@ namespace Ueef\Postbox\Interfaces {
         public function getData(): array;
         public function getRoute(): array;
         public function getQueue(): string;
-        public function getContext(): array;
+        public function setContext(array $context);
+        public function getContext(): ?array;
     }
 }
 

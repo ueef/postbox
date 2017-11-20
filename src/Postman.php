@@ -12,6 +12,7 @@ namespace Ueef\Postbox {
     use Ueef\Postbox\Interfaces\RequestInterface;
     use Ueef\Assignable\Traits\AssignableTrait;
     use Ueef\Assignable\Interfaces\AssignableInterface;
+    use Ueef\Postbox\Interfaces\TracerInterface;
     use const Zipkin\Kind\CLIENT;
     use const Zipkin\Kind\PRODUCER;
     use Zipkin\Propagation\Map;
@@ -22,67 +23,46 @@ namespace Ueef\Postbox {
     {
         use AssignableTrait;
 
-        /**
-         * @var DriverInterface
-         */
+        /** @var TracerInterface */
+        private $tracer = null;
+
+        /** @var DriverInterface */
         private $driver;
 
-        /**
-         * @var EnvelopeInterface
-         */
+        /** @var EnvelopeInterface */
         private $envelope;
 
-        /**
-         * @var ContextContainerInterface
-         */
-        private $contextContainer;
-
-        /**
-         * @var Tracing
-         */
-        private $tracing;
 
         public function send(array $route, array $data)
         {
             $request = $this->makeRequest($route, $data);
 
-            $tracer = $this->tracing->getTracer();
-            $span = $tracer->newChild($this->contextContainer->getContext());
-            $span->setKind(PRODUCER);
-            $span->setName(implode(':', $request->getRoute()));
-            $context = new ArrayObject();
-            $injector = $this->tracing->getPropagation()->getInjector(new Map());
-            $injector($span->getContext(), $context);
+            if ($this->tracer) {
+                $this->tracer->spanStart($this->tracer::TYPE_SENDING, $request);
+            }
 
-            $request->assign(['contest' => (array)$context]);
-            $encodedRequest = $this->envelope->makeRequest($request);
+            $this->driver->send($request->getQueue(), $this->envelope->makeRequest($request));
 
-            $span->start(now());
-            $this->driver->send($request->getQueue(), $encodedRequest);
-            $tracer->flush();
+            if ($this->tracer) {
+                $this->tracer->spanFinish();
+            }
         }
 
         public function request(array $route, array $data): array
         {
             $request = $this->makeRequest($route, $data);
 
-            $tracer = $this->tracing->getTracer();
-            $span = $tracer->newChild($this->contextContainer->getContext());
-            $span->setKind(CLIENT);
-            $span->setName(implode(':', $request->getRoute()));
-            $context = new ArrayObject();
-            $injector = $this->tracing->getPropagation()->getInjector(new Map());
-            $injector($span->getContext(), $context);
+            if ($this->tracer) {
+                $this->tracer->spanStart($this->tracer::TYPE_REQUESTING, $request);
+            }
 
-            $request->assign(['contest' => (array)$context]);
-            $encodedRequest = $this->envelope->makeRequest($request);
+            $response = $this->envelope->parseResponse(
+                $this->driver->request($request->getQueue(), $this->envelope->makeRequest($request))
+            );
 
-            $span->start(now());
-            $encodedResponse = $this->driver->request($request->getQueue(), $encodedRequest);
-            $span->finish(now());
-            $tracer->flush();
-
-            $response = $this->envelope->parseResponse($encodedResponse);
+            if ($this->tracer) {
+                $this->tracer->spanFinish($response);
+            }
 
             if (Exception::NONE !== $response->getErrorCode()) {
                 throw new HandlerException($response->getErrorMessage(), $response->getErrorCode());
