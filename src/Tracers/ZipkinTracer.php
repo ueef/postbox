@@ -13,10 +13,8 @@ namespace Ueef\Postbox\Tracers {
     use Ueef\Postbox\Interfaces\ResponseInterface;
     use Ueef\Assignable\Interfaces\AssignableInterface;
 
-    class ZipkinTracer implements TracerInterface, AssignableInterface
+    class ZipkinTracer implements TracerInterface
     {
-        use AssignableTrait;
-
         /** @var Span */
         private $span;
 
@@ -29,6 +27,11 @@ namespace Ueef\Postbox\Tracers {
         /** @var TraceContext */
         private $context;
 
+
+        public function __construct(Tracing $zipkin)
+        {
+            $this->zipkin = $zipkin;
+        }
 
         public function spanStart(int $type, RequestInterface &$request)
         {
