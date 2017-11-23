@@ -68,6 +68,10 @@ namespace Ueef\Postbox\Tracers {
             $this->span->finish();
             $this->span->flush();
 
+            if (self::TYPE_HANDLING == $this->span_type) {
+                $this->context = null;
+            }
+
             $this->span = null;
             $this->span_type = null;
         }
