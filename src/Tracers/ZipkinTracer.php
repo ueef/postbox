@@ -2,16 +2,15 @@
 
 namespace Ueef\Postbox\Tracers {
 
+    use ArrayObject;
     use Zipkin\Kind;
     use Zipkin\Span;
     use Zipkin\Tracing;
     use Zipkin\TraceContext;
     use Zipkin\Propagation\Map;
-    use Ueef\Assignable\Traits\AssignableTrait;
     use Ueef\Postbox\Interfaces\TracerInterface;
     use Ueef\Postbox\Interfaces\RequestInterface;
     use Ueef\Postbox\Interfaces\ResponseInterface;
-    use Ueef\Assignable\Interfaces\AssignableInterface;
 
     class ZipkinTracer implements TracerInterface
     {
@@ -67,9 +66,9 @@ namespace Ueef\Postbox\Tracers {
                 $this->span->setKind(Kind\SERVER);
             }
 
-            $requestContext = [];
+            $requestContext = new ArrayObject();
             $this->zipkin->getPropagation()->getInjector(new Map())($this->span->getContext(), $requestContext);
-            $request->setContext($requestContext);
+            $request->setContext($requestContext->getArrayCopy());
 
             $this->span->start();
         }
