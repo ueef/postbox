@@ -45,7 +45,11 @@ namespace Ueef\Postbox\Tracers {
             $tracer = $this->zipkin->getTracer();
 
             if ($this->context) {
-                $this->span = $tracer->newChild($this->context);
+                if (self::TYPE_HANDLING == $type) {
+                    $this->span = $tracer->joinSpan($this->context);
+                } else {
+                    $this->span = $tracer->newChild($this->context);
+                }
             } else {
                 $this->span = $tracer->newTrace();
             }
