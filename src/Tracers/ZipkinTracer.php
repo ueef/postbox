@@ -30,12 +30,16 @@ namespace Ueef\Postbox\Tracers {
         private $context;
 
 
-        public function spanStart(int $type, RequestInterface &$request, ?array $context = null)
+        public function spanStart(int $type, RequestInterface &$request)
         {
             $this->span_type = $type;
 
-            if ($context) {
-                $this->context = $this->zipkin->getPropagation()->getExtractor(new Map())($context);
+            if (self::TYPE_HANDLING == $type) {
+                $context = $request->getContext();
+
+                if ($context) {
+                    $this->context = $this->zipkin->getPropagation()->getExtractor(new Map())($context);
+                }
             }
 
             $tracer = $this->zipkin->getTracer();
