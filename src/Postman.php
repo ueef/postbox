@@ -5,7 +5,6 @@ namespace Ueef\Postbox {
     use ArrayObject;
     use Ueef\Postbox\Exceptions\Exception;
     use Ueef\Postbox\Exceptions\HandlerException;
-    use Ueef\Postbox\Interfaces\ContextContainerInterface;
     use Ueef\Postbox\Interfaces\DriverInterface;
     use Ueef\Postbox\Interfaces\PostmanInterface;
     use Ueef\Postbox\Interfaces\EnvelopeInterface;
@@ -13,11 +12,6 @@ namespace Ueef\Postbox {
     use Ueef\Assignable\Traits\AssignableTrait;
     use Ueef\Assignable\Interfaces\AssignableInterface;
     use Ueef\Postbox\Interfaces\TracerInterface;
-    use const Zipkin\Kind\CLIENT;
-    use const Zipkin\Kind\PRODUCER;
-    use Zipkin\Propagation\Map;
-    use function Zipkin\Timestamp\now;
-    use Zipkin\Tracing;
 
     class Postman implements AssignableInterface, PostmanInterface
     {

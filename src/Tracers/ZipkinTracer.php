@@ -17,6 +17,9 @@ namespace Ueef\Postbox\Tracers {
         /** @var Span */
         private $span;
 
+        /** @var Span */
+        private $root_span;
+
         /** @var integer */
         private $span_type;
 
@@ -53,13 +56,20 @@ namespace Ueef\Postbox\Tracers {
                     $this->span = $tracer->newChild($this->context);
                 }
             } else {
-                $this->span = $tracer->newTrace();
+                $this->root_span = $tracer->newTrace();
+                $this->root_span->setName('root-' . $this->getSpanName($request));
+
+                $this->span = $tracer->newChild($this->root_span->getContext());
             }
 
             $this->span->setName($this->getSpanName($request));
 
-            if (self::TYPE_SENDING == $type || self::TYPE_REQUESTING == $type) {
+            if (self::TYPE_REQUESTING == $type) {
                 $this->span->setKind(Kind\CLIENT);
+            }
+
+            if (self::TYPE_SENDING == $type) {
+                $this->span->setKind(Kind\PRODUCER);
             }
 
             if (self::TYPE_HANDLING == $type) {
@@ -70,6 +80,9 @@ namespace Ueef\Postbox\Tracers {
             $this->zipkin->getPropagation()->getInjector(new Map())($this->span->getContext(), $requestContext);
             $request->setContext($requestContext->getArrayCopy());
 
+            if ($this->root_span) {
+                $this->root_span->start();
+            }
             $this->span->start();
         }
 
@@ -77,6 +90,12 @@ namespace Ueef\Postbox\Tracers {
         {
             $this->span->finish();
             $this->span->flush();
+
+            if ($this->root_span) {
+                $this->root_span->finish();
+                $this->root_span->flush();
+                $this->root_span = null;
+            }
 
             if (self::TYPE_HANDLING == $this->span_type) {
                 $this->context = null;

@@ -32,7 +32,7 @@ namespace Ueef\Postbox {
                 $request = $this->envelope->parseRequest($encodedRequest);
 
                 if ($this->tracer) {
-                    $this->tracer->spanStart($this->tracer::TYPE_HANDLING, $request, $request->getContext());
+                    $this->tracer->spanStart($this->tracer::TYPE_HANDLING, $request);
                 }
 
                 $response = new Response();
