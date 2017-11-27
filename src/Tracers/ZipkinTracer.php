@@ -14,21 +14,17 @@ namespace Ueef\Postbox\Tracers {
 
     class ZipkinTracer implements TracerInterface
     {
-        /** @var Span */
-        private $span;
+        /** @var Span[] */
+        private $spans;
 
         /** @var Span */
         private $root_span;
-
-        /** @var integer */
-        private $span_type;
 
         /** @var Tracing */
         private $zipkin;
 
         /** @var TraceContext */
         private $context;
-
 
         public function __construct(Tracing $zipkin)
         {
@@ -37,8 +33,6 @@ namespace Ueef\Postbox\Tracers {
 
         public function spanStart(int $type, RequestInterface &$request)
         {
-            $this->span_type = $type;
-
             if (self::TYPE_HANDLING == $type) {
                 $context = $request->getContext();
 
@@ -51,58 +45,50 @@ namespace Ueef\Postbox\Tracers {
 
             if ($this->context) {
                 if (self::TYPE_HANDLING == $type) {
-                    $this->span = $tracer->joinSpan($this->context);
+                    $span = $tracer->joinSpan($this->context);
                 } else {
-                    $this->span = $tracer->newChild($this->context);
+                    $span = $tracer->newChild($this->context);
                 }
             } else {
                 $this->root_span = $tracer->newTrace();
                 $this->root_span->setName('root-' . $this->getSpanName($request));
+                $this->root_span->start();
 
-                $this->span = $tracer->newChild($this->root_span->getContext());
+                $span = $tracer->newChild($this->root_span->getContext());
             }
 
-            $this->span->setName($this->getSpanName($request));
+            $span->setName($this->getSpanName($request));
 
             if (self::TYPE_REQUESTING == $type) {
-                $this->span->setKind(Kind\CLIENT);
+                $span->setKind(Kind\CLIENT);
             }
 
             if (self::TYPE_SENDING == $type) {
-                $this->span->setKind(Kind\PRODUCER);
+                $span->setKind(Kind\PRODUCER);
             }
 
             if (self::TYPE_HANDLING == $type) {
-                $this->span->setKind(Kind\SERVER);
+                $span->setKind(Kind\SERVER);
             }
 
             $requestContext = new ArrayObject();
-            $this->zipkin->getPropagation()->getInjector(new Map())($this->span->getContext(), $requestContext);
+            $this->zipkin->getPropagation()->getInjector(new Map())($span->getContext(), $requestContext);
             $request->setContext($requestContext->getArrayCopy());
 
-            if ($this->root_span) {
-                $this->root_span->start();
-            }
-            $this->span->start();
+            $span->start();
+            $this->spans[] = $span;
         }
 
         public function spanFinish(?ResponseInterface $response = null)
         {
-            $this->span->finish();
-            $this->span->flush();
+            $span = array_pop($this->spans);
+            $span->finish();
+            $span->flush();
 
             if ($this->root_span) {
                 $this->root_span->finish();
                 $this->root_span->flush();
-                $this->root_span = null;
             }
-
-            if (self::TYPE_HANDLING == $this->span_type) {
-                $this->context = null;
-            }
-
-            $this->span = null;
-            $this->span_type = null;
         }
 
         private function getSpanName(RequestInterface $request)
