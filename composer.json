@@ -5,7 +5,7 @@
   "require": {
     "php": ">=7.1",
     "ueef/assignable": "^0.0.4",
-    "jcchavezs/zipkin": "dev-master"
+    "jcchavezs/zipkin": "1.2.*"
   },
   "autoload": {
     "psr-4": {

@@ -6,7 +6,7 @@ namespace Ueef\Postbox\Tracers {
     use Zipkin\Kind;
     use Zipkin\Span;
     use Zipkin\Tracing;
-    use Zipkin\TraceContext;
+    use Zipkin\Propagation\TraceContext;
     use Zipkin\Propagation\Map;
     use Ueef\Postbox\Interfaces\TracerInterface;
     use Ueef\Postbox\Interfaces\RequestInterface;
