@@ -17,9 +17,6 @@ namespace Ueef\Postbox\Tracers {
         /** @var Span[] */
         private $spans;
 
-        /** @var Span */
-        private $root_span;
-
         /** @var Tracing */
         private $zipkin;
 
@@ -50,11 +47,7 @@ namespace Ueef\Postbox\Tracers {
                     $span = $tracer->newChild($this->context);
                 }
             } else {
-                $this->root_span = $tracer->newTrace();
-                $this->root_span->setName('root-' . $this->getSpanName($request));
-                $this->root_span->start();
-
-                $span = $tracer->newChild($this->root_span->getContext());
+                $span = $tracer->newTrace();
             }
 
             $span->setName($this->getSpanName($request));
@@ -84,11 +77,6 @@ namespace Ueef\Postbox\Tracers {
             $span = array_pop($this->spans);
             $span->finish();
             $span->flush();
-
-            if ($this->root_span) {
-                $this->root_span->finish();
-                $this->root_span->flush();
-            }
         }
 
         private function getSpanName(RequestInterface $request)
