@@ -64,9 +64,9 @@ namespace Ueef\Postbox\Tracers {
                 $span->setKind(Kind\SERVER);
             }
 
-            $requestContext = new ArrayObject();
+            $requestContext = [];
             $this->zipkin->getPropagation()->getInjector(new Map())($span->getContext(), $requestContext);
-            $request->setContext($requestContext->getArrayCopy());
+            $request->setContext($requestContext);
 
             $span->start();
             $this->spans[] = $span;
