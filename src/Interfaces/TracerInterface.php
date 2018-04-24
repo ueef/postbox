@@ -8,8 +8,8 @@ namespace Ueef\Postbox\Interfaces {
         const TYPE_HANDLING = 2;
         const TYPE_REQUESTING = 3;
 
-        public function spanStart(int $type, RequestInterface &$request);
-        public function spanFinish(?ResponseInterface $response = null);
+        public function spanStart(int $type, RequestInterface $request);
+        public function spanFinish(int $type, ?ResponseInterface $response = null);
     }
 }
 

@@ -2,7 +2,6 @@
 
 namespace Ueef\Postbox {
 
-    use ArrayObject;
     use Ueef\Postbox\Exceptions\Exception;
     use Ueef\Postbox\Exceptions\HandlerException;
     use Ueef\Postbox\Interfaces\DriverInterface;
@@ -32,13 +31,13 @@ namespace Ueef\Postbox {
             $request = $this->makeRequest($route, $data);
 
             if ($this->tracer) {
-                $this->tracer->spanStart($this->tracer::TYPE_SENDING, $request);
+                $this->tracer->spanStart(TracerInterface::TYPE_SENDING, $request);
             }
 
             $this->driver->send($request->getQueue(), $this->envelope->makeRequest($request));
 
             if ($this->tracer) {
-                $this->tracer->spanFinish();
+                $this->tracer->spanFinish(TracerInterface::TYPE_SENDING);
             }
         }
 
@@ -47,7 +46,7 @@ namespace Ueef\Postbox {
             $request = $this->makeRequest($route, $data);
 
             if ($this->tracer) {
-                $this->tracer->spanStart($this->tracer::TYPE_REQUESTING, $request);
+                $this->tracer->spanStart(TracerInterface::TYPE_REQUESTING, $request);
             }
 
             $response = $this->envelope->parseResponse(
@@ -55,7 +54,7 @@ namespace Ueef\Postbox {
             );
 
             if ($this->tracer) {
-                $this->tracer->spanFinish($response);
+                $this->tracer->spanFinish(TracerInterface::TYPE_REQUESTING, $response);
             }
 
             if (Exception::NONE !== $response->getErrorCode()) {

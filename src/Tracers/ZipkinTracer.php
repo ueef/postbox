@@ -31,7 +31,7 @@ namespace Ueef\Postbox\Tracers {
             $this->tags = $tags;
         }
 
-        public function spanStart(int $type, RequestInterface &$request)
+        public function spanStart(int $type, RequestInterface $request)
         {
             if (self::TYPE_HANDLING == $type) {
                 $context = $request->getContext();
@@ -54,7 +54,6 @@ namespace Ueef\Postbox\Tracers {
             }
 
             $span->setName($this->getSpanName($request));
-            $span->tag('request', json_encode($request->getData(), JSON_UNESCAPED_UNICODE));
             foreach ($this->tags as $k => $v) {
                 $span->tag($k, $v);
             }
@@ -68,6 +67,7 @@ namespace Ueef\Postbox\Tracers {
             }
 
             if (self::TYPE_HANDLING == $type) {
+                $span->tag('request', json_encode($request->getData(), JSON_UNESCAPED_UNICODE));
                 $span->setKind(Kind\SERVER);
             }
 
@@ -79,10 +79,14 @@ namespace Ueef\Postbox\Tracers {
             $this->spans[] = $span;
         }
 
-        public function spanFinish(?ResponseInterface $response = null)
+        public function spanFinish(int $type, ?ResponseInterface $response = null)
         {
             $span = array_pop($this->spans);
-            $span->tag('response', json_encode($response->getData(), JSON_UNESCAPED_UNICODE));
+
+            if ($type == self::TYPE_HANDLING) {
+                $span->tag('response', json_encode($response->getData(), JSON_UNESCAPED_UNICODE));
+            }
+
             $span->finish();
             $span->flush();
         }

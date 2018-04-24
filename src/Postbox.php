@@ -32,7 +32,7 @@ namespace Ueef\Postbox {
                 $request = $this->envelope->parseRequest($encodedRequest);
 
                 if ($this->tracer) {
-                    $this->tracer->spanStart($this->tracer::TYPE_HANDLING, $request);
+                    $this->tracer->spanStart(TracerInterface::TYPE_HANDLING, $request);
                 }
 
                 $response = new Response();
@@ -65,7 +65,7 @@ namespace Ueef\Postbox {
                 }
 
                 if ($this->tracer) {
-                    $this->tracer->spanFinish($response);
+                    $this->tracer->spanFinish(TracerInterface::TYPE_HANDLING, $response);
                 }
 
                 return $this->envelope->makeResponse($response);
