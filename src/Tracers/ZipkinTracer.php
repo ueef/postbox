@@ -17,15 +17,19 @@ namespace Ueef\Postbox\Tracers {
         /** @var Span[] */
         private $spans;
 
+        /** @var array */
+        private $tags;
+
         /** @var Tracing */
         private $zipkin;
 
         /** @var TraceContext */
         private $context;
 
-        public function __construct(Tracing $zipkin)
+        public function __construct(Tracing $zipkin, array $tags = [])
         {
             $this->zipkin = $zipkin;
+            $this->tags = $tags;
         }
 
         public function spanStart(int $type, RequestInterface &$request)
@@ -51,6 +55,9 @@ namespace Ueef\Postbox\Tracers {
             }
 
             $span->setName($this->getSpanName($request));
+            foreach ($this->tags as $k => $v) {
+                $span->tag($k, $v);
+            }
 
             if (self::TYPE_REQUESTING == $type) {
                 $span->setKind(Kind\CLIENT);
