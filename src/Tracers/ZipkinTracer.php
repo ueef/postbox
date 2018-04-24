@@ -2,7 +2,6 @@
 
 namespace Ueef\Postbox\Tracers {
 
-    use ArrayObject;
     use Zipkin\Kind;
     use Zipkin\Span;
     use Zipkin\Tracing;
@@ -55,6 +54,7 @@ namespace Ueef\Postbox\Tracers {
             }
 
             $span->setName($this->getSpanName($request));
+            $span->tag('request', json_encode($request->getData(), JSON_UNESCAPED_UNICODE));
             foreach ($this->tags as $k => $v) {
                 $span->tag($k, $v);
             }
@@ -82,6 +82,7 @@ namespace Ueef\Postbox\Tracers {
         public function spanFinish(?ResponseInterface $response = null)
         {
             $span = array_pop($this->spans);
+            $span->tag('response', json_encode($response->getData(), JSON_UNESCAPED_UNICODE));
             $span->finish();
             $span->flush();
         }
