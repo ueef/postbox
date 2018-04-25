@@ -2,6 +2,7 @@
 
 namespace Ueef\Postbox\Tracers {
 
+    use Ueef\Postbox\Exceptions\Exception;
     use Zipkin\Kind;
     use Zipkin\Span;
     use Zipkin\Tracing;
@@ -84,7 +85,12 @@ namespace Ueef\Postbox\Tracers {
             $span = array_pop($this->spans);
 
             if ($type == self::TYPE_HANDLING) {
-                $span->tag('response', json_encode($response->getData(), JSON_UNESCAPED_UNICODE));
+                if ($response->getErrorCode() == Exception::NONE) {
+                    $span->tag('response', json_encode($response->getData(), JSON_UNESCAPED_UNICODE));
+                } else {
+                    $span->tag('error_code', ($response->getErrorCode()));
+                    $span->tag('error_message', ($response->getErrorMessage()));
+                }
             }
 
             $span->finish();
