@@ -2,10 +2,19 @@
   "name": "ueef/postbox",
   "type": "library",
   "description": "",
+  "config": {
+    "vendor-dir": "var/vendor"
+  },
   "require": {
-    "php": ">=7.1",
-    "ueef/assignable": "^0.0.4",
-    "jcchavezs/zipkin": "1.2.*"
+    "php": ">=7.2",
+    "ueef/typer": "^0.1.1",
+    "ueef/packable": "^0.4.0",
+    "ueef/assignable": "^0.1.1",
+    "openzipkin/zipkin": "^1.3",
+    "ueef/encoder": "^0.0.1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^7.3"
   },
   "autoload": {
     "psr-4": {

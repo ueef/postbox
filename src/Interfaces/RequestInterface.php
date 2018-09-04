@@ -1,17 +1,18 @@
 <?php
+declare(strict_types=1);
 
 namespace Ueef\Postbox\Interfaces {
 
-    use Ueef\Assignable\Interfaces\AssignableInterface;
+    use Ueef\Packable\Interfaces\PackableInterface;
 
-    interface RequestInterface extends AssignableInterface
+    interface RequestInterface extends PackableInterface
     {
-        public function __toString(): string;
         public function getData(): array;
         public function getRoute(): array;
         public function getQueue(): string;
-        public function setContext(array $context);
-        public function getContext(): ?array;
+        public function setContext(array $context): void;
+        public function getContext(): array;
+        public function getDelayedTo(): int;
     }
 }
 

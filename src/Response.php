@@ -1,34 +1,63 @@
 <?php
+declare(strict_types=1);
 
 namespace Ueef\Postbox {
 
-    use Ueef\Postbox\Exceptions\Exception;
+    use Ueef\Postbox\Interfaces\RequestInterface;
     use Ueef\Postbox\Interfaces\ResponseInterface;
-    use Ueef\Assignable\Traits\AssignableTrait;
 
     class Response implements ResponseInterface
     {
-        use AssignableTrait;
-
         /** @var array */
         private $data = [];
 
-        /** @var array */
-        private $route = [];
+        /** @var RequestInterface */
+        private $request = null;
 
-        /** @var integer */
-        private $error_code = Exception::NONE;
+        /** @var string */
+        private $error_code = 0;
 
         /** @var string */
         private $error_message = '';
 
 
-        public function __toString(): string
+        public function __construct(array $data = [], ?RequestInterface $request = null, int $errorCode = 0, string $errorMessage = '')
         {
-            return (
-                json_encode($this->getData(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . PHP_EOL .
-                json_encode(['code' => $this->getErrorCode(), 'message' => $this->getErrorMessage()], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-            );
+            $this->data = $data;
+            $this->request = $request;
+            $this->error_code = $errorCode;
+            $this->error_message = $errorMessage;
+        }
+
+        public function pack(): array
+        {
+            return [
+                'data' => $this->data,
+                'request' => $this->request ? $this->request->pack() : null,
+                'error_code' => $this->error_code,
+                'error_message' => $this->error_message,
+            ];
+        }
+
+        public function assign(array $parameters): void
+        {
+            foreach ($parameters as $key => $value) {
+                switch ($key) {
+                    case 'data':
+                        if (is_array($value)) {
+                            $this->{$key} = $value;
+                        }
+                        break;
+                    case 'request':
+                        $this->request = new Request();
+                        $this->request->assign($value);
+                        break;
+                    case 'error_code':
+                    case 'error_message':
+                        $this->{$key} = (string) $value;
+                        break;
+                }
+            }
         }
 
         public function getData(): array
@@ -36,12 +65,12 @@ namespace Ueef\Postbox {
             return $this->data;
         }
 
-        public function getRoute(): array
+        public function getRequest(): RequestInterface
         {
-            return $this->route;
+            return $this->request;
         }
 
-        public function getErrorCode(): int
+        public function getErrorCode(): string
         {
             return $this->error_code;
         }

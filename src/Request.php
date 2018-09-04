@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Ueef\Postbox {
 
@@ -7,24 +8,57 @@ namespace Ueef\Postbox {
 
     class Request implements RequestInterface
     {
-        use AssignableTrait;
+        /** @var array */
+        private $data = [];
 
         /** @var array */
-        private $data;
+        private $route = [];
 
         /** @var array */
-        private $route;
+        private $context = [];
 
-        /** @var string */
-        private $queue;
-
-        /** @var array */
-        private $context;
+        /** @var integer */
+        private $delayed_to = 0;
 
 
-        public function __toString(): string
+        public function __construct(array $data = [], array $route = [], int $delayedTo = 0)
         {
-            return implode('.', $this->getRoute()) . PHP_EOL . json_encode($this->getData(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . PHP_EOL;
+            $this->data = $data;
+            $this->route = array_values($route);
+            $this->delayed_to = $delayedTo;
+        }
+
+        public function pack(): array
+        {
+            return [
+                'data' => $this->data,
+                'route' => $this->route,
+                'context' => $this->context,
+                'delayed_to' => $this->delayed_to,
+            ];
+        }
+
+        public function assign(array $parameters): void
+        {
+            foreach ($parameters as $key => $value) {
+                switch ($key) {
+                    case 'data':
+                    case 'context':
+                        if (is_array($value)) {
+                            $this->{$key} = $value;
+                        }
+                        break;
+                    case 'route':
+                        $this->{$key} = array_values($value);
+                        break;
+                    case 'queue':
+                        $this->{$key} = (string) $value;
+                        break;
+                    case 'delayed_to':
+                        $this->{$key} = (int) $value;
+                        break;
+                }
+            }
         }
 
         public function getData(): array
@@ -39,17 +73,22 @@ namespace Ueef\Postbox {
 
         public function getQueue(): string
         {
-            return $this->queue;
+            return $this->route[0];
         }
 
-        public function setContext(array $context)
+        public function setContext(array $context): void
         {
             $this->context = $context;
         }
 
-        public function getContext(): ?array
+        public function getContext(): array
         {
             return $this->context;
+        }
+
+        public function getDelayedTo(): int
+        {
+            return $this->delayed_to;
         }
     }
 }

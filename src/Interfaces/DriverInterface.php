@@ -1,12 +1,14 @@
 <?php
+declare(strict_types=1);
 
 namespace Ueef\Postbox\Interfaces {
 
     interface DriverInterface
     {
-        public function wait(string $from, callable $callback);
-        public function send(string $to, string $message);
-        public function request(string $to, string $message): string;
+        public function wait(bool $nonBlocking = false): void;
+        public function listen(string $queue, callable $callback): void;
+        public function send(string $queue, string $message): void;
+        public function request(string $queue, string $message): string;
     }
 }
 

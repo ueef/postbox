@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Ueef\Postbox\Tracers {
 
@@ -14,17 +15,18 @@ namespace Ueef\Postbox\Tracers {
 
     class ZipkinTracer implements TracerInterface
     {
-        /** @var Span[] */
-        private $spans;
-
         /** @var array */
         private $tags;
+
+        /** @var Span[] */
+        private $spans;
 
         /** @var Tracing */
         private $zipkin;
 
         /** @var TraceContext */
         private $context;
+
 
         public function __construct(Tracing $zipkin, array $tags = [])
         {
