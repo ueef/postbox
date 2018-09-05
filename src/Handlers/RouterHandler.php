@@ -24,10 +24,9 @@ namespace Ueef\Postbox\Handlers {
 
         public function __invoke(RequestInterface $request)
         {
-            $route = array_slice($request->getRoute(), 1);
-
+            $route = $request->getRoute();
             if (!$route) {
-                throw new HandlerException('unexpected end of route');
+                throw new HandlerException("route is empty");
             }
 
             $handlerKey = array_shift($route);
@@ -37,7 +36,7 @@ namespace Ueef\Postbox\Handlers {
             } elseif ($this->default_handler) {
                 $handler = $this->default_handler;
             } else {
-                throw new HandlerException(['"%s" handler is undefined', $handlerKey]);
+                throw new HandlerException(["handler for '%s' is not defined", $handlerKey]);
             }
 
             $request = clone $request;

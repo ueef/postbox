@@ -10,7 +10,8 @@
     "ueef/typer": "^0.1",
     "ueef/encoder": "^0.0",
     "ueef/packable": "^0.4",
-    "ueef/assignable": "^0.1"
+    "ueef/assignable": "^0.1",
+    "ueef/exceptions": "^0.0.5"
   },
   "require-dev": {
     "phpunit/phpunit": "^7.3"

@@ -94,7 +94,7 @@ namespace Ueef\Postbox {
                     }
 
                     if (!is_array($data)) {
-                        throw new HandlerException('Handler returns not an array');
+                        throw new HandlerException('handler returns not an array');
                     }
 
                     $response = new Response($data, $request);

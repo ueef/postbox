@@ -11,10 +11,14 @@ namespace Ueef\Postbox\Handlers {
     {
         public function __invoke(RequestInterface $request)
         {
-            $action = $this->getActionName($request->getRoute());
+            $route = $request->getRoute();
+            if (!$route) {
+                throw new HandlerException("route is empty");
+            }
 
+            $action = $this->getActionName($request->getRoute());
             if (!method_exists($this, $action)) {
-                throw new HandlerException('Route "' . $action . '" is undefined');
+                throw new HandlerException(["action '%s' is undefined", $action]);
             }
 
             return $this->{$action}($request->getData());
@@ -22,11 +26,6 @@ namespace Ueef\Postbox\Handlers {
 
         protected function getActionName(array $route): string
         {
-            $route = array_slice($route, 1);
-            if (!$route) {
-                throw new HandlerException('Route is empty');
-            }
-
             return lcfirst(str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', implode(' ', $route)))));
         }
     }
