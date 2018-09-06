@@ -4,12 +4,14 @@ declare(strict_types=1);
 namespace Ueef\Postbox {
 
     use Throwable;
-    use Ueef\Postbox\Interfaces\HandlerInterface;
     use Ueef\Postbox\Interfaces\TracerInterface;
     use Ueef\Postbox\Interfaces\DriverInterface;
     use Ueef\Postbox\Interfaces\PostboxInterface;
-    use Ueef\Postbox\Exceptions\HandlerException;
+    use Ueef\Postbox\Interfaces\HandlerInterface;
+    use Ueef\Postbox\Interfaces\RequestInterface;
     use Ueef\Encoder\Interfaces\EncoderInterface;
+    use Ueef\Postbox\Interfaces\ResponseInterface;
+    use Ueef\Postbox\Exceptions\HandlerException;
 
     class Postbox implements PostboxInterface
     {
@@ -30,20 +32,15 @@ namespace Ueef\Postbox {
             $this->encoder = $encoder;
         }
 
-        public function send(array $route, array $data, int $delay = 0): void
+        public function send(array $route, array $data, int $delayedTo = 0): void
         {
-            $delayedTo = 0;
-            if ($delay) {
-                $delayedTo = time() + $delay;
-            }
-
             $request = new Request($data, $route, $delayedTo);
 
             if ($this->tracer) {
                 $this->tracer->spanStart(TracerInterface::TYPE_SENDING, $request);
             }
 
-            $this->driver->send($request->getQueue(), $this->encoder->encode($request->pack()));
+            $this->driverSend($request);
 
             if ($this->tracer) {
                 $this->tracer->spanFinish(TracerInterface::TYPE_SENDING);
@@ -58,12 +55,7 @@ namespace Ueef\Postbox {
                 $this->tracer->spanStart(TracerInterface::TYPE_REQUESTING, $request);
             }
 
-            $response = new Response();
-            $response->assign(
-                $this->encoder->decode(
-                    $this->driver->request($request->getQueue(), $this->encoder->encode($request->pack()))
-                )
-            );
+            $response = $this->driverRequest($request);
 
             if ($this->tracer) {
                 $this->tracer->spanFinish(TracerInterface::TYPE_REQUESTING, $response);
@@ -78,10 +70,15 @@ namespace Ueef\Postbox {
 
         public function listen(string $queue, HandlerInterface $handler): void
         {
-            $this->driver->listen($queue, function (string $rawRequest) use ($handler) {
+            $this->driver->listen($queue, function (string $rawRequest) use ($handler): string {
 
                 $request = new Request();
                 $request->assign($this->encoder->decode($rawRequest));
+
+                if ($request->getDelayedTo() - time() > 0) {
+                    $this->driverSend($request);
+                    return "";
+                }
 
                 if ($this->tracer) {
                     $this->tracer->spanStart(TracerInterface::TYPE_HANDLING, $request);
@@ -94,17 +91,13 @@ namespace Ueef\Postbox {
                     }
 
                     if (!is_array($data)) {
-                        throw new HandlerException('handler returns not an array');
+                        throw new HandlerException("handler returns not an array");
                     }
 
                     $response = new Response($data, $request);
                 } catch (Throwable $e) {
-                    $errorCode = $e->getCode();
-                    $errorMessage = $e->getMessage();
-
-                    $response = new Response([], $request, $errorCode, $errorMessage);
+                    $response = new Response([], $request, $e->getCode() ?: 1, $e->getMessage());
                 }
-
                 if ($this->tracer) {
                     $this->tracer->spanFinish(TracerInterface::TYPE_HANDLING, $response);
                 }
@@ -116,6 +109,22 @@ namespace Ueef\Postbox {
         public function wait(bool $nonBlocking = false): void
         {
             $this->driver->wait($nonBlocking);
+        }
+
+        private function driverSend(RequestInterface $request): void
+        {
+            $this->driver->send($request->getQueue(), $this->encoder->encode($request->pack()));
+        }
+
+        private function driverRequest(RequestInterface $request): ResponseInterface
+        {
+            $rawResponse = $this->driver->request($request->getQueue(), $this->encoder->encode($request->pack()));
+            $rawResponse = $this->encoder->decode($rawResponse);
+
+            $response = new Response();
+            $response->assign($rawResponse);
+
+            return $response;
         }
     }
 }
