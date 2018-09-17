@@ -9,7 +9,7 @@ namespace Ueef\Postbox\Handlers {
 
     class AbstractHandler implements HandlerInterface
     {
-        public function __invoke(RequestInterface $request)
+        public function handle(RequestInterface $request): array
         {
             $route = $request->getRoute();
             if (!$route) {

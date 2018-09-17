@@ -5,7 +5,7 @@ namespace Ueef\Postbox\Interfaces {
 
     interface HandlerInterface
     {
-        public function __invoke(RequestInterface $request): array;
+        public function handle(RequestInterface $request): array;
     }
 }
 

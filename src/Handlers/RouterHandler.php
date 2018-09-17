@@ -22,7 +22,7 @@ namespace Ueef\Postbox\Handlers {
             $this->default_handler = $defaultHandler;
         }
 
-        public function __invoke(RequestInterface $request)
+        public function handle(RequestInterface $request): array
         {
             $route = $request->getRoute();
             if (!$route) {

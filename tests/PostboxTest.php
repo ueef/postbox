@@ -29,7 +29,7 @@ namespace Ueef\Postbox\Tests {
                     $this->response = &$response;
                 }
 
-                public function __invoke(RequestInterface $request)
+                public function handle(RequestInterface $request): array
                 {
                     $this->response = $request->getData();
                 }
@@ -51,7 +51,7 @@ namespace Ueef\Postbox\Tests {
 
             $postbox->listen($queue, new class implements HandlerInterface
             {
-                public function __invoke(RequestInterface $request)
+                public function handle(RequestInterface $request): array
                 {
                     return $request->getData();
                 }
