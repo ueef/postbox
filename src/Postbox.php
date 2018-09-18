@@ -97,9 +97,9 @@ class Postbox implements PostboxInterface
         });
     }
 
-    public function wait(bool $nonBlocking = false): void
+    public function wait(): void
     {
-        $this->driver->wait($nonBlocking);
+        $this->driver->wait();
     }
 
     private function driverSend(RequestInterface $request, int $delayedTo = 0): void
