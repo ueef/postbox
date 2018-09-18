@@ -34,13 +34,13 @@ namespace Ueef\Postbox {
 
         public function send(array $route, array $data, int $delayedTo = 0): void
         {
-            $request = new Request($data, $route, $delayedTo);
+            $request = new Request($data, $route);
 
             if ($this->tracer) {
                 $this->tracer->spanStart(TracerInterface::TYPE_SENDING, $request);
             }
 
-            $this->driverSend($request);
+            $this->driverSend($request, $delayedTo);
 
             if ($this->tracer) {
                 $this->tracer->spanFinish(TracerInterface::TYPE_SENDING);
@@ -75,20 +75,11 @@ namespace Ueef\Postbox {
                 $request = new Request();
                 $request->assign($this->encoder->decode($rawRequest));
 
-                if ($request->getDelayedTo() - time() > 0) {
-                    $this->driverSend($request);
-                    return "";
-                }
-
                 if ($this->tracer) {
                     $this->tracer->spanStart(TracerInterface::TYPE_HANDLING, $request);
                 }
                 try {
-                    $data = $handler($request);
-
-                    if (null === $data) {
-                        $data = [];
-                    }
+                    $data = $handler->handle($request);
 
                     if (!is_array($data)) {
                         throw new HandlerException("handler returns not an array");
@@ -111,9 +102,9 @@ namespace Ueef\Postbox {
             $this->driver->wait($nonBlocking);
         }
 
-        private function driverSend(RequestInterface $request): void
+        private function driverSend(RequestInterface $request, int $delayedTo = 0): void
         {
-            $this->driver->send($request->getQueue(), $this->encoder->encode($request->pack()));
+            $this->driver->send($request->getQueue(), $this->encoder->encode($request->pack()), $delayedTo);
         }
 
         private function driverRequest(RequestInterface $request): ResponseInterface

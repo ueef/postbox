@@ -93,7 +93,7 @@ namespace Ueef\Postbox\Tests {
                     };
                 }
 
-                public function send(string $queue, string $message): void
+                public function send(string $queue, string $message, int $delayedTo = 0): void
                 {
                     $this->queues[$queue][] = [$message, ""];
                 }

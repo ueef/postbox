@@ -17,15 +17,11 @@ namespace Ueef\Postbox {
         /** @var array */
         private $context = [];
 
-        /** @var integer */
-        private $delayed_to = 0;
 
-
-        public function __construct(array $data = [], array $route = [], int $delayedTo = 0)
+        public function __construct(array $data = [], array $route = [])
         {
             $this->data = $data;
             $this->route = array_values($route);
-            $this->delayed_to = $delayedTo;
         }
 
         public function pack(): array
@@ -34,7 +30,6 @@ namespace Ueef\Postbox {
                 'data' => $this->data,
                 'route' => $this->route,
                 'context' => $this->context,
-                'delayed_to' => $this->delayed_to,
             ];
         }
 
@@ -53,9 +48,6 @@ namespace Ueef\Postbox {
                         break;
                     case 'queue':
                         $this->{$key} = (string) $value;
-                        break;
-                    case 'delayed_to':
-                        $this->{$key} = (int) $value;
                         break;
                 }
             }
@@ -84,11 +76,6 @@ namespace Ueef\Postbox {
         public function getContext(): array
         {
             return $this->context;
-        }
-
-        public function getDelayedTo(): int
-        {
-            return $this->delayed_to;
         }
     }
 }

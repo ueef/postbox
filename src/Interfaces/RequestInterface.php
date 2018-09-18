@@ -12,7 +12,6 @@ namespace Ueef\Postbox\Interfaces {
         public function getQueue(): string;
         public function setContext(array $context): void;
         public function getContext(): array;
-        public function getDelayedTo(): int;
     }
 }
 
