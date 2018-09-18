@@ -1,121 +1,120 @@
 <?php
 declare(strict_types=1);
 
-namespace Ueef\Postbox {
+namespace Ueef\Postbox;
 
-    use Throwable;
-    use Ueef\Postbox\Interfaces\TracerInterface;
-    use Ueef\Postbox\Interfaces\DriverInterface;
-    use Ueef\Postbox\Interfaces\PostboxInterface;
-    use Ueef\Postbox\Interfaces\HandlerInterface;
-    use Ueef\Postbox\Interfaces\RequestInterface;
-    use Ueef\Encoder\Interfaces\EncoderInterface;
-    use Ueef\Postbox\Interfaces\ResponseInterface;
-    use Ueef\Postbox\Exceptions\HandlerException;
+use Throwable;
+use Ueef\Postbox\Interfaces\TracerInterface;
+use Ueef\Postbox\Interfaces\DriverInterface;
+use Ueef\Postbox\Interfaces\PostboxInterface;
+use Ueef\Postbox\Interfaces\HandlerInterface;
+use Ueef\Postbox\Interfaces\RequestInterface;
+use Ueef\Encoder\Interfaces\EncoderInterface;
+use Ueef\Postbox\Interfaces\ResponseInterface;
+use Ueef\Postbox\Exceptions\HandlerException;
 
-    class Postbox implements PostboxInterface
+class Postbox implements PostboxInterface
+{
+    /** @var TracerInterface */
+    private $tracer = null;
+
+    /** @var DriverInterface */
+    private $driver;
+
+    /** @var EncoderInterface */
+    private $encoder;
+
+
+    public function __construct(DriverInterface $driver, EncoderInterface $encoder, ?TracerInterface $tracer = null)
     {
-        /** @var TracerInterface */
-        private $tracer = null;
+        $this->driver = $driver;
+        $this->tracer = $tracer;
+        $this->encoder = $encoder;
+    }
 
-        /** @var DriverInterface */
-        private $driver;
+    public function send(array $route, array $data, int $delayedTo = 0): void
+    {
+        $request = new Request($data, $route);
 
-        /** @var EncoderInterface */
-        private $encoder;
-
-
-        public function __construct(DriverInterface $driver, EncoderInterface $encoder, ?TracerInterface $tracer = null)
-        {
-            $this->driver = $driver;
-            $this->tracer = $tracer;
-            $this->encoder = $encoder;
+        if ($this->tracer) {
+            $this->tracer->spanStart(TracerInterface::TYPE_SENDING, $request);
         }
 
-        public function send(array $route, array $data, int $delayedTo = 0): void
-        {
-            $request = new Request($data, $route);
+        $this->driverSend($request, $delayedTo);
 
-            if ($this->tracer) {
-                $this->tracer->spanStart(TracerInterface::TYPE_SENDING, $request);
-            }
+        if ($this->tracer) {
+            $this->tracer->spanFinish(TracerInterface::TYPE_SENDING);
+        }
+    }
 
-            $this->driverSend($request, $delayedTo);
+    public function request(array $route, array $data): array
+    {
+        $request = new Request($data, $route);
 
-            if ($this->tracer) {
-                $this->tracer->spanFinish(TracerInterface::TYPE_SENDING);
-            }
+        if ($this->tracer) {
+            $this->tracer->spanStart(TracerInterface::TYPE_REQUESTING, $request);
         }
 
-        public function request(array $route, array $data): array
-        {
-            $request = new Request($data, $route);
+        $response = $this->driverRequest($request);
 
-            if ($this->tracer) {
-                $this->tracer->spanStart(TracerInterface::TYPE_REQUESTING, $request);
-            }
-
-            $response = $this->driverRequest($request);
-
-            if ($this->tracer) {
-                $this->tracer->spanFinish(TracerInterface::TYPE_REQUESTING, $response);
-            }
-
-            if ($response->getErrorCode() > 0) {
-                throw new HandlerException($response->getErrorMessage(), $response->getErrorCode());
-            }
-
-            return $response->getData();
+        if ($this->tracer) {
+            $this->tracer->spanFinish(TracerInterface::TYPE_REQUESTING, $response);
         }
 
-        public function listen(string $queue, HandlerInterface $handler): void
-        {
-            $this->driver->listen($queue, function (string $rawRequest) use ($handler): string {
+        if ($response->getErrorCode() > 0) {
+            throw new HandlerException($response->getErrorMessage(), $response->getErrorCode());
+        }
 
-                $request = new Request();
-                $request->assign($this->encoder->decode($rawRequest));
+        return $response->getData();
+    }
 
-                if ($this->tracer) {
-                    $this->tracer->spanStart(TracerInterface::TYPE_HANDLING, $request);
-                }
-                try {
-                    $data = $handler->handle($request);
+    public function listen(string $queue, HandlerInterface $handler): void
+    {
+        $this->driver->listen($queue, function (string $rawRequest) use ($handler): string {
 
-                    if (!is_array($data)) {
-                        throw new HandlerException("handler returns not an array");
-                    }
+            $request = new Request();
+            $request->assign($this->encoder->decode($rawRequest));
 
-                    $response = new Response($data, $request);
-                } catch (Throwable $e) {
-                    $response = new Response([], $request, $e->getCode() ?: 1, $e->getMessage());
-                }
-                if ($this->tracer) {
-                    $this->tracer->spanFinish(TracerInterface::TYPE_HANDLING, $response);
+            if ($this->tracer) {
+                $this->tracer->spanStart(TracerInterface::TYPE_HANDLING, $request);
+            }
+            try {
+                $data = $handler->handle($request);
+
+                if (!is_array($data)) {
+                    throw new HandlerException("handler returns not an array");
                 }
 
-                return $this->encoder->encode($response->pack());
-            });
-        }
+                $response = new Response($data, $request);
+            } catch (Throwable $e) {
+                $response = new Response([], $request, $e->getCode() ?: 1, $e->getMessage());
+            }
+            if ($this->tracer) {
+                $this->tracer->spanFinish(TracerInterface::TYPE_HANDLING, $response);
+            }
 
-        public function wait(bool $nonBlocking = false): void
-        {
-            $this->driver->wait($nonBlocking);
-        }
+            return $this->encoder->encode($response->pack());
+        });
+    }
 
-        private function driverSend(RequestInterface $request, int $delayedTo = 0): void
-        {
-            $this->driver->send($request->getQueue(), $this->encoder->encode($request->pack()), $delayedTo);
-        }
+    public function wait(bool $nonBlocking = false): void
+    {
+        $this->driver->wait($nonBlocking);
+    }
 
-        private function driverRequest(RequestInterface $request): ResponseInterface
-        {
-            $rawResponse = $this->driver->request($request->getQueue(), $this->encoder->encode($request->pack()));
-            $rawResponse = $this->encoder->decode($rawResponse);
+    private function driverSend(RequestInterface $request, int $delayedTo = 0): void
+    {
+        $this->driver->send($request->getQueue(), $this->encoder->encode($request->pack()), $delayedTo);
+    }
 
-            $response = new Response();
-            $response->assign($rawResponse);
+    private function driverRequest(RequestInterface $request): ResponseInterface
+    {
+        $rawResponse = $this->driver->request($request->getQueue(), $this->encoder->encode($request->pack()));
+        $rawResponse = $this->encoder->decode($rawResponse);
 
-            return $response;
-        }
+        $response = new Response();
+        $response->assign($rawResponse);
+
+        return $response;
     }
 }
