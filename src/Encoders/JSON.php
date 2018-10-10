@@ -9,7 +9,13 @@ namespace Ueef\Postbox\Encoders {
     {
         public function encode(array $message): string
         {
-            return json_encode($message, JSON_UNESCAPED_UNICODE);
+            $message = json_encode($message, JSON_UNESCAPED_UNICODE);
+
+            if (JSON_ERROR_NONE !== json_last_error()) {
+                throw new EncoderException('Json error: ' . json_last_error_msg(), EncoderException::FORMAT);
+            }
+
+            return $message;
         }
 
         public function decode(string $message): array
