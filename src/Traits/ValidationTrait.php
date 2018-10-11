@@ -65,6 +65,24 @@ namespace Ueef\Postbox\Traits {
             return false;
         }
 
+        private function validateIsNumeric(string $field, array $data)
+        {
+            if (isset($data[$field]) && !is_numeric($data[$field])) {
+                return '"' . $field . '" is not a number';
+            }
+
+            return false;
+        }
+
+        private function validateIsString(string $field, array $data)
+        {
+            if (isset($data[$field]) && !is_string($data[$field])) {
+                return '"' . $field . '" is not a string';
+            }
+
+            return false;
+        }
+
         private function validateIsInteger(string $field, array $data)
         {
             if (isset($data[$field]) && !is_integer($data[$field])) {
@@ -74,10 +92,10 @@ namespace Ueef\Postbox\Traits {
             return false;
         }
 
-        private function validateIsNumeric(string $field, array $data)
+        private function validateIsPositiveInteger(string $field, array $data)
         {
-            if (isset($data[$field]) && !is_numeric($data[$field])) {
-                return '"' . $field . '" is not an number';
+            if (isset($data[$field]) && !is_integer($data[$field]) && $data[$field] <= 0) {
+                return '"' . $field . '" isn\'t a positive integer';
             }
 
             return false;
