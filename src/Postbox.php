@@ -25,9 +25,14 @@ namespace Ueef\Postbox {
         private $envelope;
 
 
-        public function wait(string $from, callable $handler)
+        public function wait()
         {
-            $this->driver->wait($from, function (string $encodedRequest) use ($handler) {
+            $this->driver->wait();
+        }
+
+        public function consume(string $from, callable $handler)
+        {
+            $this->driver->consume($from, function (string $encodedRequest) use ($handler) {
 
                 $request = $this->envelope->parseRequest($encodedRequest);
 

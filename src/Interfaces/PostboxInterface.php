@@ -4,6 +4,7 @@ namespace Ueef\Postbox\Interfaces {
 
     interface PostboxInterface
     {
-        public function wait(string $from, callable $handler);
+        public function wait();
+        public function consume(string $from, callable $handler);
     }
 }
