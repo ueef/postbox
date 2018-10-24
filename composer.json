@@ -4,7 +4,7 @@
   "description": "",
   "require": {
     "php": ">=7.1",
-    "ueef/assignable": "^0.0.4",
+    "ueef/assignable": "*",
     "jcchavezs/zipkin": "1.2.*"
   },
   "autoload": {
