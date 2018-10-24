@@ -22,6 +22,11 @@ namespace Ueef\Postbox {
         private $context;
 
 
+        public function __construct(array $parameters = [])
+        {
+            $this->assign($parameters);
+        }
+
         public function __toString(): string
         {
             return implode('.', $this->getRoute()) . PHP_EOL . json_encode($this->getData(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . PHP_EOL;

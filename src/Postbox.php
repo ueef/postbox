@@ -25,6 +25,11 @@ namespace Ueef\Postbox {
         private $envelope;
 
 
+        public function __construct(array $parameters = [])
+        {
+            $this->assign($parameters);
+        }
+
         public function wait()
         {
             $this->driver->wait();

@@ -26,6 +26,11 @@ namespace Ueef\Postbox {
         private $envelope;
 
 
+        public function __construct(array $parameters = [])
+        {
+            $this->assign($parameters);
+        }
+
         public function send(array $route, array $data)
         {
             $request = $this->makeRequest($route, $data);

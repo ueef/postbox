@@ -20,6 +20,11 @@ namespace Ueef\Postbox {
         private $encoder;
 
 
+        public function __construct(array $parameters = [])
+        {
+            $this->assign($parameters);
+        }
+
         public function makeRequest(RequestInterface $request): string
         {
             return $this->encoder->encode([

@@ -23,6 +23,11 @@ namespace Ueef\Postbox {
         private $error_message = '';
 
 
+        public function __construct(array $parameters = [])
+        {
+            $this->assign($parameters);
+        }
+
         public function __toString(): string
         {
             return (
