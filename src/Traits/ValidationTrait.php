@@ -111,7 +111,7 @@ namespace Ueef\Postbox\Traits {
 
         private function validateIsPositiveInteger(string $field, array $data)
         {
-            if (isset($data[$field]) && !is_integer($data[$field]) && $data[$field] <= 0) {
+            if (isset($data[$field]) && (!is_integer($data[$field] || $data[$field] <= 0))) {
                 return '"' . $field . '" isn\'t a positive integer';
             }
 
