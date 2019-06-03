@@ -3,10 +3,9 @@ declare(strict_types=1);
 
 namespace Ueef\Postbox;
 
-use Ueef\Encoder\Interfaces\EncoderInterface;
 use Ueef\Postbox\Interfaces\DriverInterface;
-use Ueef\Postbox\Interfaces\HandlerInterface;
 use Ueef\Postbox\Interfaces\PostboxInterface;
+use Ueef\Encoder\Interfaces\EncoderInterface;
 
 class Postbox implements PostboxInterface
 {
@@ -33,10 +32,10 @@ class Postbox implements PostboxInterface
         $this->driver->send($queue, $this->encoder->encode($message));
     }
 
-    public function consume(string $queue, HandlerInterface $handler)
+    public function consume(string $queue, callable $handler)
     {
         $this->driver->consume($queue, function (string $message) use ($handler) {
-            $handler->handle($this->encoder->decode($message));
+            $handler($this->encoder->decode($message));
         });
     }
 }

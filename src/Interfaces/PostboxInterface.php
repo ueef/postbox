@@ -7,5 +7,5 @@ interface PostboxInterface
 {
     public function wait();
     public function send(string $queue, array $message): void;
-    public function consume(string $queue, HandlerInterface $handler);
+    public function consume(string $queue, callable $handler);
 }
