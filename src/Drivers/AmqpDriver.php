@@ -18,10 +18,9 @@ class AmqpDriver implements DriverInterface
     private $encoder;
 
 
-    public function __construct(AMQPStreamConnection $connection, EncoderInterface $encoder)
+    public function __construct(AMQPStreamConnection $connection)
     {
         $this->channel = $connection->channel();
-        $this->encoder = $encoder;
     }
 
     public function wait(): void
