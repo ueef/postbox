@@ -1,85 +1,42 @@
 <?php
+declare(strict_types=1);
 
-namespace Ueef\Postbox {
+namespace Ueef\Postbox;
 
-    use Throwable;
-    use Ueef\Postbox\Exceptions\HandlerException;
-    use Ueef\Postbox\Interfaces\TracerInterface;
-    use Ueef\Postbox\Interfaces\DriverInterface;
-    use Ueef\Postbox\Interfaces\PostboxInterface;
-    use Ueef\Postbox\Interfaces\EnvelopeInterface;
-    use Ueef\Assignable\Traits\AssignableTrait;
-    use Ueef\Assignable\Interfaces\AssignableInterface;
+use Ueef\Encoder\Interfaces\EncoderInterface;
+use Ueef\Postbox\Interfaces\DriverInterface;
+use Ueef\Postbox\Interfaces\HandlerInterface;
+use Ueef\Postbox\Interfaces\PostboxInterface;
 
-    class Postbox implements AssignableInterface, PostboxInterface
+class Postbox implements PostboxInterface
+{
+    /** @var DriverInterface */
+    private $driver;
+
+    /** @var EncoderInterface */
+    private $encoder;
+
+
+    public function __construct(DriverInterface $driver, EncoderInterface $encoder)
     {
-        use AssignableTrait;
+        $this->driver = $driver;
+        $this->encoder = $encoder;
+    }
 
-        /** @var TracerInterface */
-        private $tracer = null;
+    public function wait()
+    {
+        $this->driver->wait();
+    }
 
-        /** @var DriverInterface */
-        private $driver;
+    public function send(string $queue, array $message): void
+    {
+        $this->driver->send($queue, $this->encoder->encode($message));
+    }
 
-        /** @var EnvelopeInterface */
-        private $envelope;
-
-
-        public function __construct(array $parameters = [])
-        {
-            $this->assign($parameters);
-        }
-
-        public function wait()
-        {
-            $this->driver->wait();
-        }
-
-        public function consume(string $from, callable $handler)
-        {
-            $this->driver->consume($from, function (string $encodedRequest) use ($handler) {
-
-                $request = $this->envelope->parseRequest($encodedRequest);
-
-                if ($this->tracer) {
-                    $this->tracer->spanStart(TracerInterface::TYPE_HANDLING, $request);
-                }
-
-                $response = new Response();
-                try {
-                    $data = call_user_func($handler, $request);
-
-                    if (null === $data) {
-                        $data = [];
-                    }
-
-                    if (!is_array($data)) {
-                        throw new HandlerException('Handler returns not an array');
-                    }
-
-                    $response->assign([
-                        'route' => $request->getRoute(),
-                        'data' => $data,
-                    ]);
-                } catch (Throwable $e) {
-                    $errorCode = $e->getCode();
-                    $errorMessage = $e->getMessage();
-                    if (HandlerException::NONE == $errorCode) {
-                        $errorCode = HandlerException::UNKNOWN;
-                    }
-
-                    $response->assign([
-                        'error_code' => $errorCode,
-                        'error_message' => $errorMessage,
-                    ]);
-                }
-
-                if ($this->tracer) {
-                    $this->tracer->spanFinish(TracerInterface::TYPE_HANDLING, $response);
-                }
-
-                return $this->envelope->makeResponse($response);
-            });
-        }
+    public function consume(string $queue, HandlerInterface $handler)
+    {
+        $this->driver->consume($queue, function (string $message) use ($handler) {
+            $handler->handle($this->encoder->decode($message));
+        });
     }
 }
