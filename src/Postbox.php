@@ -35,7 +35,7 @@ class Postbox implements PostboxInterface
     public function consume(string $queue, callable $handler)
     {
         $this->driver->consume($queue, function (string $message) use ($handler) {
-            $handler($this->encoder->decode($message));
+            return $handler($this->encoder->decode($message));
         });
     }
 }

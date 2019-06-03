@@ -41,12 +41,11 @@ class AmqpDriver implements DriverInterface
         $this->channel->basic_qos(null, 1, null);
 
         $this->channel->basic_consume($queue, '', false, false, false, false, function (AMQPMessage $message) use ($callback) {
-            $result = $callback($message->getBody());
-            if ($message->has('reply_to')) {
-                $message->delivery_info['channel']->basic_publish(new AMQPMessage($result, ['correlation_id' => $message->get('correlation_id')]), '', $message->get('reply_to'));
+            if ($callback($message->getBody())) {
+                $message->delivery_info['channel']->basic_ack($message->delivery_info['delivery_tag']);
+            } else {
+                $message->delivery_info['channel']->basic_nack($message->delivery_info['delivery_tag'], false, true);
             }
-
-            $message->delivery_info['channel']->basic_ack($message->delivery_info['delivery_tag']);
         });
     }
 }
