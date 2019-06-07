@@ -5,8 +5,7 @@ namespace Ueef\Postbox\Drivers;
 
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Channel\AMQPChannel;
-use PhpAmqpLib\Connection\AMQPStreamConnection;
-use Ueef\Encoder\Interfaces\EncoderInterface;
+use PhpAmqpLib\Connection\AbstractConnection;
 use Ueef\Postbox\Interfaces\DriverInterface;
 
 class AmqpDriver implements DriverInterface
@@ -14,11 +13,8 @@ class AmqpDriver implements DriverInterface
     /** @var AMQPChannel */
     private $channel;
 
-    /** @var EncoderInterface */
-    private $encoder;
 
-
-    public function __construct(AMQPStreamConnection $connection)
+    public function __construct(AbstractConnection $connection)
     {
         $this->channel = $connection->channel();
     }
