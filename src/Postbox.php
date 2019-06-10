@@ -27,9 +27,14 @@ class Postbox implements PostboxInterface
         $this->driver->wait();
     }
 
-    public function send(string $queue, array $message): void
+    public function send(string $queue, string $exchange, array $message): void
     {
-        $this->driver->send($queue, $this->encoder->encode($message));
+        $this->driver->send($queue, $exchange, $this->encoder->encode($message));
+    }
+
+    public function bind(string $queue, string $exchange)
+    {
+        $this->driver->bind($queue, $exchange);
     }
 
     public function consume(string $queue, callable $handler)

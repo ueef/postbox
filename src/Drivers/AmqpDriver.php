@@ -17,6 +17,7 @@ class AmqpDriver implements DriverInterface
     public function __construct(AbstractConnection $connection)
     {
         $this->channel = $connection->channel();
+        $this->channel->basic_qos(null, 1, null);
     }
 
     public function wait(): void
@@ -26,21 +27,26 @@ class AmqpDriver implements DriverInterface
         }
     }
 
-    public function send(string $queue, string $message): void
+    public function send(string $queue, string $exchange, string $message): void
     {
-        $this->channel->basic_publish(new AMQPMessage($message), '', $queue);
+        $this->channel->basic_publish(new AMQPMessage($message), $exchange, $queue);
+    }
+
+    public function bind(string $queue, string $exchange)
+    {
+        $this->channel->exchange_declare($exchange, 'direct', false, false, false);
+        $this->channel->queue_bind($queue, $exchange);
     }
 
     public function consume(string $queue, callable $callback): void
     {
         $this->channel->queue_declare($queue, false, false, false, false);
-        $this->channel->basic_qos(null, 1, null);
 
         $this->channel->basic_consume($queue, '', false, false, false, false, function (AMQPMessage $message) use ($callback) {
             if ($callback($message->getBody())) {
-                $message->delivery_info['channel']->basic_ack($message->delivery_info['delivery_tag']);
+                $this->channel->basic_ack($message->delivery_info['delivery_tag']);
             } else {
-                $message->delivery_info['channel']->basic_nack($message->delivery_info['delivery_tag'], false, true);
+                $this->channel->basic_nack($message->delivery_info['delivery_tag'], false, true);
             }
         });
     }
