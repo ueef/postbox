@@ -23,7 +23,7 @@ class AmqpDriver implements DriverInterface
     public function wait(): void
     {
         while($this->channel->callbacks) {
-            $this->channel->wait();
+            $this->channel->wait(null, false, 2.0);
         }
     }
 
