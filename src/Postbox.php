@@ -22,9 +22,9 @@ class Postbox implements PostboxInterface
         $this->encoder = $encoder;
     }
 
-    public function wait()
+    public function wait(bool $nonBlocking = false, float $timeout = 0): void
     {
-        $this->driver->wait();
+        $this->driver->wait($nonBlocking, $timeout);
     }
 
     public function send(string $queue, string $exchange, array $message): void

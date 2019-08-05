@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ueef\Postbox\Drivers;
 
+use PhpAmqpLib\Exception\AMQPTimeoutException;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AbstractConnection;
@@ -20,11 +21,11 @@ class AmqpDriver implements DriverInterface
         $this->channel->basic_qos(null, 1, null);
     }
 
-    public function wait(): void
+    public function wait(bool $nonBlocking = false, float $timeout = 0): void
     {
-        while($this->channel->callbacks) {
-            $this->channel->wait();
-        }
+        try {
+            $this->channel->wait(null, $nonBlocking, $timeout);
+        } catch (AMQPTimeoutException $e) {}
     }
 
     public function send(string $queue, string $exchange, string $message): void
